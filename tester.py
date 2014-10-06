@@ -75,10 +75,17 @@ def config(dir,params):
     # flatten config
     config = config_flatten(result)
     # apply params
+    missing_key = False
     for key in config:
         template = Template(config[key])
-        val = template.substitute(params)
-        config[key] = val
+        try:
+           val = template.substitute(params)
+           config[key] = val
+        except KeyError:
+           print "missing value for config value",key
+           missing_key = True
+    if missing_key:
+       exit (1)
     return config
 
 #
@@ -139,7 +146,7 @@ def run_file(file):
 def extract_config_params_from_args(args):
     args_dictionary = vars(args)
     params = {}
-    if args_dictionary['config_param'] != []:
+    if args_dictionary['config_param'] != None:
        for key_val in args_dictionary['config_param']:
            key_vals = key_val.split(":")
            params[key_vals[0]] = key_vals[1]
@@ -148,22 +155,24 @@ def extract_config_params_from_args(args):
 
 def run(args):
     compile(args)
-    dir = args.directory
-    files = []
-    for (dirpath, dirnames, filenames) in os.walk(dir):
-        for filename in get_templates_from_list(filenames):
-            files.append(filename)
-    files.sort(cmp=template_compare_filename)
-    for file in files:
-        file_return = run_file(os.path.join(dir,get_file_from_template(file)))
-        if file_return != 0:
-           break
+    for dir in args.directory:
+        print "running files in",dir
+        files = []
+        for (dirpath, dirnames, filenames) in os.walk(dir):
+            for filename in get_templates_from_list(filenames):
+                files.append(filename)
+        files.sort(cmp=template_compare_filename)
+        for file in files:
+            file_return = run_file(os.path.join(dir,get_file_from_template(file)))
+            if file_return != 0:
+               break
 
 def compile(args):
     params = extract_config_params_from_args(args)
-    dir = args.directory
-    configuration = config(dir,params)
-    template_prepare(configuration,dir)
+    for dir in args.directory:
+        print "compiling files in",dir
+        configuration = config(dir,params)
+        template_prepare(configuration,dir)
 
 
 if __name__ == "__main__":
@@ -171,14 +180,15 @@ if __name__ == "__main__":
     subparsers = parser.add_subparsers(help="command")
 
     _run = subparsers.add_parser('run')
-    _run.add_argument('directory',help='directory to run from')
+    _run.add_argument('directory',nargs='+',help='directory to run tests')
     _run.add_argument('--config_param',action='append',help='config param to be passed')
     _run.set_defaults(func=run)
 
     _compile = subparsers.add_parser('compile')
-    _compile.add_argument('directory',help='directory to compile from')
+    _compile.add_argument('directory',nargs='+',help='directory to compile tests')
     _compile.add_argument('--config_param',action='append',help='config param to be passed')
     _compile.set_defaults(func=compile)
 
     args=parser.parse_args()
     args.func(args)   
+
