@@ -13,6 +13,7 @@ AWS_ZONE=us-east-1c
 AWS_PLACEMENT_GROUP=""
 INSTANCE_TYPE=m3.xlarge
 IMAGE_NAME=$SRC_ROOT/build/release.x64/usr.img
+OSV_VERSION=""
 TESTS=""
 
 PARAM_HELP_LONG="--help"
@@ -22,11 +23,12 @@ PARAM_REGION="--region"
 PARAM_ZONE="--zone"
 PARAM_PLACEMENT_GROUP="--placement-group"
 PARAM_IMAGE="--override-image"
+PARAM_OSV_VERSION="--osv-version"
 
 print_help() {
  cat <<HLPEND
 
-ec2_tester.sh [$PARAM_HELP] [$PARAM_HELP_LONG] [$PARAM_SRC src] [$PARAM_IMAGE image] [$PARAM_REGION region] [$PARAM_ZONE zone] [$PARAM_PLACEMENT_GROUP placement-group] test-directory ...
+ec2_tester.sh [$PARAM_HELP] [$PARAM_HELP_LONG] [$PARAM_SRC src] [$PARAM_IMAGE image] [$PARAM_REGION region] [$PARAM_ZONE zone] [$PARAM_PLACEMENT_GROUP placement-group] [$PARAM_OSV_VERSION osv-version] test-directory ...
 
 This script is used to run tests on an AWS against a spawnned aws node running an image
 
@@ -46,7 +48,8 @@ This script receives following command line arguments:
     $PARAM_ZONE <availability zone> - AWS availability zone to work in
     $PARAM_PLACEMENT_GROUP <placement group> - Placement group for instances created by this script
     $PARAM_IMAGE <image file> - do not rebuild OSv, upload specified image instead
-    $PARAM_TESTS <test directories> - list of test directories seperated by comma
+    $PARAM_OSV_VERSION <osv-version> - osv version as string
+    <test directories> - list of test directories seperated by comma
 
 HLPEND
 }
@@ -72,6 +75,10 @@ do
       ;;
     "$PARAM_PLACEMENT_GROUP")
       AWS_PLACEMENT_GROUP=$2
+      shift 2
+      ;;
+    "$PARAM_OSV_VERSION")
+      OSV_VERSION=$2
       shift 2
       ;;
     "$PARAM_HELP")
@@ -120,7 +127,10 @@ handle_test_error() {
 }
 
 prepare_instance_for_test() {
- local TEST_OSV_VER=`$SCRIPTS_ROOT/osv-version.sh`-ec2-tester-`timestamp`
+ if test x"$OSV_VERSION" == ""; then
+    OSV_VERSION=`$SCRIPTS_ROOT/osv-version.sh` 
+ fi
+ local TEST_OSV_VER=$OSV_VERSION-ec2-tester-`timestamp`
  local TEST_INSTANCE_NAME=OSv-$TEST_OSV_VER
 
  if test x"$AWS_PLACEMENT_GROUP" != x""; then
