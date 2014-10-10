@@ -16,6 +16,7 @@ import re
 import traceback
 #import supervision
 import shutil
+import sys
 from random import randrange
 from contextlib import contextmanager
 #from json_utils import *
@@ -85,7 +86,7 @@ def config(dir,params):
            print "missing value for config value",key
            missing_key = True
     if missing_key:
-       exit (1)
+       sys.exit (1)
     return config
 
 #
@@ -155,6 +156,7 @@ def extract_config_params_from_args(args):
 
 def run(args):
     compile(args)
+    error = False
     for dir in args.directory:
         print "running files in",dir
         files = []
@@ -165,7 +167,12 @@ def run(args):
         for file in files:
             file_return = run_file(os.path.join(dir,get_file_from_template(file)))
             if file_return != 0:
+               error = True
                break
+        if error:
+           break;
+    if error:
+        sys.exit(1)
 
 def compile(args):
     params = extract_config_params_from_args(args)
