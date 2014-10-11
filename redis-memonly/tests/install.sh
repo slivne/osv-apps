@@ -6,6 +6,7 @@ tests_dir=${0%/*}
 cd $tests_dir/..
 
 VERSION=3.0.0-beta3
+rm -Rf upstream
 mkdir upstream
 cd upstream
 wget https://github.com/antirez/redis/archive/$VERSION.tar.gz
