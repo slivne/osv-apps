@@ -24,6 +24,8 @@ from string import Template
 from os import listdir
 from os.path import isfile, join
 
+class ConfigTemplate(Template):
+    idpattern = r'[a-z][\-_a-z0-9]*'
 #
 # config files
 #
@@ -36,13 +38,11 @@ def config_merge(a,b,path=None):
             elif a[key] == b[key]:
                 pass # same leaf value
             else:
-                template = Template(b[key])
+                template = ConfigTemplate(b[key])
                 val = template.substitute(a)
                 a[key] = val
         else:
-            template = Template(b[key])
-            val = template.substitute(a)
-            a[key] = val
+            a[key] = b[key]
     return a
 
 def config_flatten(d, parent_key='', sep='_'):
@@ -78,7 +78,7 @@ def config(dir,params):
     # apply params
     missing_key = False
     for key in config:
-        template = Template(config[key])
+        template = ConfigTemplate(config[key])
         try:
            val = template.substitute(params)
            config[key] = val
@@ -119,9 +119,14 @@ def template_prepare(params,dir):
 def template_apply(in_file, params):
     out_file = get_file_from_template(in_file)
     in_fh = open(in_file, 'r')
-    template = Template(in_fh.read())
+    template = ConfigTemplate(in_fh.read())
     out_fh = open(out_file, 'w')
-    out_fh.write(template.substitute(params))
+    try:
+       out_fh.write(template.substitute(params))
+    except KeyError:
+       print "missing value for config value in",in_file
+       missing_key = True
+       sys.exit (1)
     in_fh.close()
     out_fh.close()
     os.chmod(out_file,0755)
