@@ -25,6 +25,7 @@ from os import listdir
 from os.path import isfile, join
 
 class ConfigTemplate(Template):
+    delimiter = '$$'
     idpattern = r'[a-z][\-_a-z0-9]*'
 #
 # config files
