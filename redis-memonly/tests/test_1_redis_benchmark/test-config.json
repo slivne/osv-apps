@@ -1,7 +1,7 @@
 {
   "tester" : {
      "redis" : {
-        "requests" : "100000"
+        "requests" : "100000",
         "clients" : "50"
   }
 }
