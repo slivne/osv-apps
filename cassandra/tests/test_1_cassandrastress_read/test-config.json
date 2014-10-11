@@ -1,0 +1,15 @@
+{
+  "tester" : {
+      "cassandra-stress-read" : {
+          "load" : "100000",
+          "warmup" :  {
+              "requests" : "100000",
+              "iterations" : "4"
+          },
+          "run" : {
+              "requests" : "100000"
+          }
+      }
+  }
+}
+
