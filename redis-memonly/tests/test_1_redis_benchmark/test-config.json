@@ -3,6 +3,6 @@
      "redis" : {
         "requests" : "100000",
         "clients" : "50"
+     }
   }
 }
-
