@@ -1,9 +1,9 @@
 {
   "tester" : {
-     "ip" : "$$tester_ip"
+     "ip" : "$$tester.ip"
   },
   "sut" : {
-     "ip" : "$$sut_ip"
+     "ip" : "$$sut.ip"
   }
 }
 

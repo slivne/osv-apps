@@ -1,3 +1,3 @@
 #!/bin/bash
 set -e
-$REDIS_BENCHMARK -h $$sut_ip -n $$tester_redis_requests -c $$tester_redis_clients
+$REDIS_BENCHMARK -h $$sut.ip -n $$tester.redis.requests -c $$tester.redis.clients
