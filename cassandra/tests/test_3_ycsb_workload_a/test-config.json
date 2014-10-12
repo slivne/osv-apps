@@ -1,0 +1,17 @@
+{
+  "tester" : {
+      "ycsb" : {
+          "recordcount" : "800000",
+          "load" : {
+              "operationcount" : "100000",
+              "threads" : "100"
+          },
+          "run" : {
+              "iterations" : "4",
+              "operationcount" : "2000000",
+              "threads" : "64 128 200 400"
+          }
+      }
+  }
+}
+
