@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-for clients in $$tester.ycsb.run.clients ; do
-    for pipelines in $$tester.ycsb.run.pipelines ; do
+for clients in $$tester.redis.clients ; do
+    for pipelines in $$tester.redis.pipelines ; do
         echo "start test
         echo "clients : $clients"
         echo "pipeline : $pipelines"
