@@ -90,7 +90,7 @@ do
       exit 0
       ;;
     *)
-      if test x"$TESTS" == x""; then
+      if test x"$TESTS" = x""; then
          TESTS="$1"
       else
          TESTS="$TESTS $1"
@@ -100,7 +100,7 @@ do
     esac
 done
 
-if test x"$TESTS" == x""; then
+if test x"$TESTS" = x""; then
    print_help
    echo "no tests specified"
    exit 0
@@ -127,7 +127,7 @@ handle_test_error() {
 }
 
 prepare_instance_for_test() {
- if test x"$OSV_VERSION" == ""; then
+ if test x"$OSV_VERSION" = x""; then
     OSV_VERSION=`$SCRIPTS_ROOT/osv-version.sh` 
  fi
  local TEST_OSV_VER=$OSV_VERSION-ec2-tester-`timestamp`
@@ -145,30 +145,20 @@ prepare_instance_for_test() {
                               --override-image $IMAGE_NAME \
                               $PLACEMENT_GROUP_PARAM || handle_test_error
 
- echo "0"
  TEST_INSTANCE_ID=`get_instance_id_by_name $TEST_INSTANCE_NAME`
 
- echo "1"
  if test x"$TEST_INSTANCE_ID" = x""; then
-  echo "2"
   handle_test_error
  fi
 
- echo "3"
  change_instance_type $TEST_INSTANCE_ID $INSTANCE_TYPE || handle_test_error
- echo "4"
  start_instances $TEST_INSTANCE_ID || handle_test_error
- echo "5"
  ec2-get-console-output $TEST_INSTANCE_ID
- echo "5.5"
  wait_for_instance_startup $TEST_INSTANCE_ID 300 || handle_test_error
- echo "6"
 
  TEST_INSTANCE_IP=`get_instance_private_ip $TEST_INSTANCE_ID`
- echo "7"
 
  if test x"$TEST_INSTANCE_IP" = x""; then
-  echo "8"
   handle_test_error
  fi
 }
@@ -181,7 +171,7 @@ ping -c 4 $TEST_INSTANCE_IP
 
 echo "=== Run tester ==="
 # TODO FIX LOCAL IP
-apps/tester.py run --config_param sut_ip:$TEST_INSTANCE_IP --config_param tester_ip:127.0.0.1 $TESTS || handle_test_error
+$SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 $TESTS || handle_test_error
 
 ec2-get-console-output $TEST_INSTANCE_ID
 
