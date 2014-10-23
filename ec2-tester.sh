@@ -41,7 +41,7 @@ This script requires following Amazon credentials to be provided via environment
     for more details
 
 This script receives following command line arguments:
-
+   
     $PARAM_HELP - print this help screen and exit
     $PARAM_SRC - osv src root
     $PARAM_REGION <region> - AWS region to work in
@@ -90,7 +90,7 @@ do
       exit 0
       ;;
     *)
-      if test x"$TESTS" = x; then
+      if test x"$TESTS" = x""; then
          TESTS="$1"
       else
          TESTS="$TESTS $1"
@@ -100,7 +100,7 @@ do
     esac
 done
 
-if test x"$TESTS" = x; then
+if test x"$TESTS" = x""; then
    print_help
    echo "no tests specified"
    exit 0
@@ -113,7 +113,7 @@ SCRIPTS_ROOT="$SRC_ROOT/scripts"
 . $SCRIPTS_ROOT/ec2-utils.sh
 
 post_test_cleanup() {
- if test x"$TEST_INSTANCE_ID" != x; then
+ if test x"$TEST_INSTANCE_ID" != x""; then
     stop_instance_forcibly $TEST_INSTANCE_ID
     wait_for_instance_shutdown $TEST_INSTANCE_ID
     delete_instance $TEST_INSTANCE_ID
@@ -127,13 +127,13 @@ handle_test_error() {
 }
 
 prepare_instance_for_test() {
- if test x"$OSV_VERSION" = x; then
-    OSV_VERSION=`$SCRIPTS_ROOT/osv-version.sh`
+ if test x"$OSV_VERSION" = x""; then
+    OSV_VERSION=`$SCRIPTS_ROOT/osv-version.sh` 
  fi
  local TEST_OSV_VER=$OSV_VERSION-ec2-tester-`timestamp`
  local TEST_INSTANCE_NAME=OSv-$TEST_OSV_VER
 
- if test x"$AWS_PLACEMENT_GROUP" != x; then
+ if test x"$AWS_PLACEMENT_GROUP" != x""; then
   PLACEMENT_GROUP_PARAM="--placement-group $AWS_PLACEMENT_GROUP"
  fi
 
@@ -147,7 +147,7 @@ prepare_instance_for_test() {
 
  TEST_INSTANCE_ID=`get_instance_id_by_name $TEST_INSTANCE_NAME`
 
- if test x"$TEST_INSTANCE_ID" = x; then
+ if test x"$TEST_INSTANCE_ID" = x""; then
   handle_test_error
  fi
 
@@ -158,7 +158,7 @@ prepare_instance_for_test() {
 
  TEST_INSTANCE_IP=`get_instance_private_ip $TEST_INSTANCE_ID`
 
- if test x"$TEST_INSTANCE_IP" = x; then
+ if test x"$TEST_INSTANCE_IP" = x""; then
   handle_test_error
  fi
 }
@@ -182,3 +182,4 @@ ec2-get-console-output $TEST_INSTANCE_ID
 echo "=== Cleaning up ==="
 post_test_cleanup
 exit 0
+
