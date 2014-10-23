@@ -8,10 +8,30 @@
           },
           "run" : {
               "iterations" : "4",
-              "operationcount" : "2000000",
+              "operationcount" : "200000",
               "threads" : "64 128 200 400"
           }
       }
-  }
+  },
+  
+  "ec2_m3.xlarge" : {
+      "tester" : {
+          "ycsb" : {
+             "run" : {
+                 "operationcount" : "400000"
+             }
+          }
+       }
+   },
+ 
+  "huginn-muninn" : {
+      "tester" : {
+          "ycsb" : {
+             "run" : {
+                 "operationcount" : "8000000"
+             }
+          }
+       }
+   }
 }
 
