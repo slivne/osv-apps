@@ -23,10 +23,11 @@ from contextlib import contextmanager
 from string import Template
 from os import listdir
 from os.path import isfile, join
+from copy import deepcopy
 
 class ConfigTemplate(Template):
     delimiter = '$$'
-    idpattern = r'[a-z][\-_a-z0-9]*'
+    idpattern = r'[a-z][\.\-_a-z0-9]*'
 #
 # config files
 #
@@ -46,7 +47,22 @@ def config_merge(a,b,path=None):
             a[key] = b[key]
     return a
 
-def config_flatten(d, parent_key='', sep='_'):
+def multi_config_merge(a,b):
+    config_merge(a["default"],b["default"])
+    for config in b:
+        if config != "default":
+           if config in a:
+              config_merge(a[config],b[config])
+           else:
+              a[config] = b[config]
+
+    for config in a:
+        if config != "default":
+           tmp = a[config]
+           a[config] = deepcopy(a["default"])
+           config_merge(a[config],tmp)
+
+def config_flatten(d, parent_key='', sep='.'):
     items = []
     for k, v in d.items():
         new_key = parent_key + sep + k if parent_key else k
@@ -57,7 +73,7 @@ def config_flatten(d, parent_key='', sep='_'):
     return dict(items)
 
 # TODO need to update the method config files are found - currently seraching up the path
-def config(dir,params):
+def config(dir,params,selector):
     # find config files
     config_files = []
     old_dir = ""
@@ -67,15 +83,28 @@ def config(dir,params):
           config_files.insert(0,os.path.join(dir,"test-config.json"))
        dir = os.path.abspath(os.path.join(dir,".."))
     result = ""
+
     # merge config files
     for fconfig in config_files:
        new_config = json.load(open(fconfig))
+       default = {}
+       if "tester" in new_config:
+          default["tester"] = new_config["tester"]
+          del new_config["tester"]
+       if "sut" in new_config:
+          default["sut"] = new_config["sut"]
+          del new_config["sut"]
+       new_config["default"] = default
        if result == "":
           result = new_config
        else:
-          config_merge(result,new_config)
+          multi_config_merge(result,new_config)
+
     # flatten config
-    config = config_flatten(result)
+    if selector not in result:
+       print "did not find configuration for ",selector," using default instead"
+       selector = "default"
+    config = config_flatten(result[selector])
     # apply params
     missing_key = False
     for key in config:
@@ -88,6 +117,7 @@ def config(dir,params):
            missing_key = True
     if missing_key:
        sys.exit (1)
+    
     return config
 
 #
@@ -184,7 +214,7 @@ def compile(args):
     params = extract_config_params_from_args(args)
     for dir in args.directory:
         print "compiling files in",dir
-        configuration = config(dir,params)
+        configuration = config(dir,params,args.config_selection)
         template_prepare(configuration,dir)
 
 
@@ -195,11 +225,13 @@ if __name__ == "__main__":
     _run = subparsers.add_parser('run')
     _run.add_argument('directory',nargs='+',help='directory to run tests')
     _run.add_argument('--config_param',action='append',help='config param to be passed')
+    _run.add_argument('--config_selection',action="store",help='config selection based on test or hw',default="default")
     _run.set_defaults(func=run)
 
     _compile = subparsers.add_parser('compile')
     _compile.add_argument('directory',nargs='+',help='directory to compile tests')
     _compile.add_argument('--config_param',action='append',help='config param to be passed')
+    _compile.add_argument('--config_selection',action="store",help='config selection based on test or hw',default="default")
     _compile.set_defaults(func=compile)
 
     args=parser.parse_args()

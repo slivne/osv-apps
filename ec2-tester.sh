@@ -173,7 +173,8 @@ ping -c 4 $TEST_INSTANCE_IP
 
 echo "=== Run tester ==="
 # TODO FIX LOCAL IP
-$SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 $TESTS || handle_test_error
+selector = "ec2_$INSTANCE_TYPE"
+$SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TESTS  || handle_test_error
 
 ec2-get-console-output $TEST_INSTANCE_ID
 
