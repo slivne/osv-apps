@@ -168,15 +168,10 @@ def template_apply(in_file, params):
 #
 def run_file(file):
     print "running ",file
-    file_stdout = open(file + ".stdout","w")
-    file_stderr = open(file + ".stderr","w")
-    file_return = subprocess.call(file, stdout=file_stdout, stderr=file_stderr, shell=True)
+    file_stdout = open(file + ".stdout_stderr","w")
+    file_return = subprocess.call(file, stdout=file_stdout, stderr=subprocess.STDOUT, shell=True)
     file_stdout.close()
-    file_stderr.close();
     print "return ",file_return
-    if file_return != 0:
-       file_stderr = open(file + ".stderr","r")
-       print file_stderr.read()
     return file_return
 
 
@@ -195,6 +190,7 @@ def run(args):
     error = False
     for dir in args.directory:
         print "running files in",dir
+        os.chdir(dir)
         files = []
         for (dirpath, dirnames, filenames) in os.walk(dir):
             for filename in get_templates_from_list(filenames):
