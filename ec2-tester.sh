@@ -167,7 +167,8 @@ selector="ec2_$INSTANCE_TYPE"
 OSV_CMDLINE="`$SCRIPTS_ROOT/tester.py config-get sut.osv.cmdline --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TESTS`"
 # TODO assuming all cmdlines are the same
 if test x"$OSV_CMDLINE" != x""; then
-   $SCRIPTS_ROOT/imgedit.py setargs '$OSV_CMDLINE' $IMAGE_NAME
+   echo "$SCRIPTS_ROOT/imgedit.py setargs \'$OSV_CMDLINE\' $IMAGE_NAME"
+   $SCRIPTS_ROOT/imgedit.py setargs \'$OSV_CMDLINE\' $IMAGE_NAME
 fi
 
 echo "=== Prepare instance for test ==="
