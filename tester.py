@@ -218,6 +218,16 @@ def compile(args):
         template_prepare(configuration,dir)
 
 
+def config_get_command(args):
+    params = extract_config_params_from_args(args)
+    if args.directory and len(args.directory) > 0:
+        configuration = config(args.directory[0],params,args.config_selection)
+        if args.param in configuration:
+           print configuration[args.param]
+           return
+    print ""   
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser('Tester')
     subparsers = parser.add_subparsers(help="command")
@@ -233,6 +243,13 @@ if __name__ == "__main__":
     _compile.add_argument('--config_param',action='append',help='config param to be passed')
     _compile.add_argument('--config_selection',action="store",help='config selection based on test or hw',default="default")
     _compile.set_defaults(func=compile)
+
+    _config_get = subparsers.add_parser('config-get')
+    _config_get.add_argument('param',help='config param to extract')
+    _config_get.add_argument('directory',nargs='+',help='directory to compile tests')
+    _config_get.add_argument('--config_param',action='append',help='config param to be passed')
+    _config_get.add_argument('--config_selection',action="store",help='config selection based on test or hw',default="default")
+    _config_get.set_defaults(func=config_get_command)
 
     args=parser.parse_args()
     args.func(args)   
