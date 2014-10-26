@@ -188,10 +188,11 @@ def extract_config_params_from_args(args):
 def run(args):
     compile(args)
     error = False
-    cwd = os.getcwd()
+    save_cwd = os.getcwd()
     for dir in args.directory:
         print "running files in",dir
-        os.chdir(cwd)
+        if os.path.isabs(dir) = False:
+           dir = os.path.join(save_cwd,dir)
         os.chdir(dir)
         files = []
         for (dirpath, dirnames, filenames) in os.walk(dir):
@@ -207,6 +208,7 @@ def run(args):
            break;
     if error:
         sys.exit(1)
+    os.chdir(save_cwd)
 
 def compile(args):
     params = extract_config_params_from_args(args)
