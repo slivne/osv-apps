@@ -168,9 +168,14 @@ def template_apply(in_file, params):
 #
 def run_file(file):
     print "running ",file
+    if os.path.isabs(file) == False:
+       file = os.path.abspath(file)
+    save_cwd = os.getcwd()
+    os.chdir(os.path.dirname(file))
     file_stdout = open(file + ".stdout_stderr","w")
     file_return = subprocess.call(file, stdout=file_stdout, stderr=subprocess.STDOUT, shell=True)
     file_stdout.close()
+    os.chdir(save_cwd)
     print "return ",file_return
     return file_return
 
@@ -188,12 +193,8 @@ def extract_config_params_from_args(args):
 def run(args):
     compile(args)
     error = False
-    save_cwd = os.getcwd()
     for dir in args.directory:
         print "running files in",dir
-        if os.path.isabs(dir) = False:
-           dir = os.path.join(save_cwd,dir)
-        os.chdir(dir)
         files = []
         for (dirpath, dirnames, filenames) in os.walk(dir):
             for filename in get_templates_from_list(filenames):
@@ -208,7 +209,6 @@ def run(args):
            break;
     if error:
         sys.exit(1)
-    os.chdir(save_cwd)
 
 def compile(args):
     params = extract_config_params_from_args(args)
