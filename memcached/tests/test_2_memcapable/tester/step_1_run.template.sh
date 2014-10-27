@@ -1,3 +1,3 @@
 #/bin/bash
 set -e
-memcapable -h $$sut.ip 
+memcapable -h $$sut.ip
