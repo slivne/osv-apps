@@ -19,7 +19,7 @@
           "recordcount" : "500000",
           "ycsb" : {
              "run" : {
-                 "operationcount" : "500000"
+                 "operationcount" : "100000"
              }
           }
        }
