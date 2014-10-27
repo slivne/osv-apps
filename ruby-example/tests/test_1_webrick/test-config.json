@@ -1,0 +1,8 @@
+{
+  "sut" : {
+      "osv" : {
+                "cmdline" : "/ruby.so /ruby-example/webrick.rb"
+      }
+  }
+}
+
