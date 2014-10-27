@@ -1,0 +1,10 @@
+{
+  "tester" : {
+     "ip" : "$$tester.ip"
+  },
+  "sut" : {
+     "ip" : "$$sut.ip"
+     "url_base" : "http://$$sut.ip:3000/"
+  }
+}
+
