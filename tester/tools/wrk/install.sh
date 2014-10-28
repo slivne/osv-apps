@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+tests_dir=${0%/*}
+
+cd $tests_dir
 if [ ! -d wrk ]; then
    git clone https://github.com/tgrabiec/wrk.git wrk
    cd wrk
