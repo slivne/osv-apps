@@ -3,8 +3,6 @@ set -e
 
 tests_dir=${0%/*}
 
-cd $tests_dir/../../tester/tool/wrk
+$tests_dir/../../tester/tools/wrk/install.sh
+cp $tests_dir/../../tester/tools/wrk/setenv.sh $tests_dir/setenv.sh
 
-./install.sh
-
-cp setenv.sh $tests_dir/setenv.sh
