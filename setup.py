@@ -15,7 +15,7 @@ standard_ec2_post_install = ['pip install awscli &&'
                              'cat /etc/environment | grep -v "^EC2_HOME=" | grep -v "^JAVA_HOME" | grep -v "PATH=\$EC2_HOME" | cat > /etc/environment_temp &&'
                              'echo "EC2_HOME=`ls -d /usr/local/ec2/ec2-api-tools-*`" >> /etc/environment_temp &&'
                              'echo "JAVA_HOME=`readlink -f /usr/bin/javac | sed \"s:bin/javac::\"`" >> /etc/environment_temp &&'
-                             'echo "PATH=$EC2_HOME/bin:$PATH" >> /etc/environment_temp &&'
+                             'echo "PATH=`ls -d /usr/local/ec2/ec2-api-tools-*`/bin:$PATH" >> /etc/environment_temp &&'
                              'cp /etc/environment /etc/environment.bk &&'
                              'mv /etc/environment_temp /etc/environment &&'
                              'echo Done. Re-login to apply environment changes for EC2']
