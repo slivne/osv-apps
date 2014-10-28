@@ -3,11 +3,8 @@ set -e
 
 tests_dir=${0%/*}
 
-cd $tests_dir
-cwd_save=`pwd`
-
-cd ../../tester/tool/wrk
+cd $tests_dir/../../tester/tool/wrk
 
 ./install.sh
 
-cp setenv.sh $cwd_save/setenv.sh
+cp setenv.sh $tests_dir/setenv.sh
