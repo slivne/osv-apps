@@ -102,7 +102,6 @@ def config(dir,params,selector):
 
     # flatten config
     if selector not in result:
-       print "did not find configuration for ",selector," using default instead"
        selector = "default"
     config = config_flatten(result[selector])
     # apply params
