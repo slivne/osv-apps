@@ -172,10 +172,11 @@ prepare_instance_for_test() {
 
  echo New instance ID is $TEST_INSTANCE_ID
 
- ec2-get-console-output $TEST_INSTANCE_ID
  wait_for_instance_startup $TEST_INSTANCE_ID 300 || handle_test_error
 
- echo_progress Renaming newly created instance OSv-$OSV_VER
+ ec2-get-console-output $TEST_INSTANCE_ID
+
+ echo Renaming newly created instance OSv-$OSV_VER
  rename_object $TEST_INSTANCE_ID $TES_INSTANCE_NAME
 
  TEST_INSTANCE_IP=`get_instance_private_ip $TEST_INSTANCE_ID`
