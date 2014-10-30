@@ -13,6 +13,7 @@ AWS_ZONE=us-east-1c
 AWS_PLACEMENT_GROUP=""
 INSTANCE_TYPE=m3.xlarge
 IMAGE_NAME=$SRC_ROOT/build/release.x64/usr.img
+AMI_ID=""
 OSV_VERSION=""
 TESTS=""
 
@@ -23,6 +24,7 @@ PARAM_REGION="--region"
 PARAM_ZONE="--zone"
 PARAM_PLACEMENT_GROUP="--placement-group"
 PARAM_IMAGE="--override-image"
+PARAM_AMI="--ami"
 PARAM_OSV_VERSION="--osv-version"
 
 print_help() {
@@ -48,6 +50,7 @@ This script receives following command line arguments:
     $PARAM_ZONE <availability zone> - AWS availability zone to work in
     $PARAM_PLACEMENT_GROUP <placement group> - Placement group for instances created by this script
     $PARAM_IMAGE <image file> - do not rebuild OSv, upload specified image instead
+    $PARAM_AMI <image file> - use specified ami
     $PARAM_OSV_VERSION <osv-version> - osv version as string
     <test directories> - list of test directories seperated by comma
 
@@ -63,6 +66,10 @@ do
       ;;
     "$PARAM_IMAGE")
       IMAGE_NAME=$2
+      shift 2
+      ;;
+    "$PARAM_AMI")
+      AMI_ID=$2
       shift 2
       ;;
     "$PARAM_REGION")
@@ -117,6 +124,7 @@ post_test_cleanup() {
     stop_instance_forcibly $TEST_INSTANCE_ID
     wait_for_instance_shutdown $TEST_INSTANCE_ID
     delete_instance $TEST_INSTANCE_ID
+    TEST_INSTANCE_ID=""
  fi
 }
 
@@ -126,7 +134,7 @@ handle_test_error() {
  exit 1
 }
 
-prepare_instance_for_test() {
+create_ami() {
  if test x"$OSV_VERSION" = x""; then
     OSV_VERSION=`$SCRIPTS_ROOT/osv-version.sh` 
  fi
@@ -138,23 +146,37 @@ prepare_instance_for_test() {
  fi
 
  echo "=== Create OSv instance ==="
- $SCRIPTS_ROOT/release-ec2.sh --instance-only \
+ $SCRIPTS_ROOT/release-ec2.sh --private-ami-only \
                               --override-version $TEST_OSV_VER \
                               --region $AWS_REGION \
                               --zone $AWS_ZONE \
                               --override-image $IMAGE_NAME \
                               $PLACEMENT_GROUP_PARAM || handle_test_error
+ AMI_ID=`get_ami_id_by_name $TEST_OSV_VER`
+}
 
- TEST_INSTANCE_ID=`get_instance_id_by_name $TEST_INSTANCE_NAME`
 
- if test x"$TEST_INSTANCE_ID" = x""; then
-  handle_test_error
+prepare_instance_for_test() {
+ if test x"$AWS_PLACEMENT_GROUP" != x""; then
+  PLACEMENT_GROUP_PARAM="--placement-group $AWS_PLACEMENT_GROUP"
  fi
 
- change_instance_type $TEST_INSTANCE_ID $INSTANCE_TYPE || handle_test_error
- start_instances $TEST_INSTANCE_ID || handle_test_error
+ TEST_INSTANCE_ID=`ec2-run-instances $AMI_ID --availability-zone $AWS_ZONE \
+                                                  --instance-type $INSTANCE_TYPE \
+                                                  $PLACEMENT_GROUP_PARAM \
+                                                  | tee /dev/tty | ec2_response_value INSTANCE INSTANCE`
+ if test x"$TEST_INSTANCE_ID" = x; then
+    handle_error Failed to create template instance.
+    break;
+ fi
+
+ echo New instance ID is $TEST_INSTANCE_ID
+
  ec2-get-console-output $TEST_INSTANCE_ID
  wait_for_instance_startup $TEST_INSTANCE_ID 300 || handle_test_error
+
+ echo_progress Renaming newly created instance OSv-$OSV_VER
+ rename_object $TEST_INSTANCE_ID $TES_INSTANCE_NAME
 
  TEST_INSTANCE_IP=`get_instance_private_ip $TEST_INSTANCE_ID`
 
@@ -162,34 +184,45 @@ prepare_instance_for_test() {
   handle_test_error
  fi
 }
-echo "=== Update image according to tests ==="
-selector="ec2_$INSTANCE_TYPE"
-OSV_CMDLINE="`$SCRIPTS_ROOT/tester.py config-get sut.osv.cmdline --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TESTS`"
-# TODO assuming all cmdlines are the same
-if test x"$OSV_CMDLINE" != x""; then
-   echo "$SCRIPTS_ROOT/imgedit.py setargs $IMAGE_NAME $OSV_CMDLINE"
-   $SCRIPTS_ROOT/imgedit.py setargs $IMAGE_NAME $OSV_CMDLINE
+
+prepare_image_for_test() {
+  echo "=== Update image according to tests ==="
+  selector="ec2_$INSTANCE_TYPE"
+  OSV_CMDLINE="`$SCRIPTS_ROOT/tester.py config-get sut.osv.cmdline --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TESTS`"
+  # TODO assuming all tests cmdlines are the same / all instance types are the same
+  if test x"$OSV_CMDLINE" != x""; then
+     echo "$SCRIPTS_ROOT/imgedit.py setargs $IMAGE_NAME $OSV_CMDLINE"
+     $SCRIPTS_ROOT/imgedit.py setargs $IMAGE_NAME $OSV_CMDLINE
+  fi
+}
+
+if test x"$AMI_ID" = x""; then
+   prepare_image_for_test
+   create_ami
 fi
 
-echo "=== Prepare instance for test ==="
-prepare_instance_for_test
 
-sleep 120
+for TEST in "$TESTS";
+do
+  echo "=== create instance for test $TEST ==="
+  prepare_instance_for_test
 
-echo "=== Ping Host ==="
-ping -c 4 $TEST_INSTANCE_IP
+  sleep 120
 
-echo "=== Run tester ==="
-# TODO FIX LOCAL IP
-selector="ec2_$INSTANCE_TYPE"
-echo "$SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TESTS"
-$SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TESTS  || handle_test_error
+  echo "=== Ping Host ==="
+  ping -c 4 $TEST_INSTANCE_IP
 
-ec2-get-console-output $TEST_INSTANCE_ID
+  echo "=== Run tester ==="
+  # TODO FIX LOCAL IP
+  selector="ec2_$INSTANCE_TYPE"
+  echo "$SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST"
+  $SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST || handle_test_error
 
-#python3 apps/tomcat/jenkins/tomcat-xml.py -o tomcat-perf.xml -m tps $WRK_OUT_FILE || handle_test_error
+  ec2-get-console-output $TEST_INSTANCE_ID
 
-echo "=== Cleaning up ==="
-post_test_cleanup
+  echo "=== cleaning up for test $TEST ==="
+  post_test_cleanup
+done
+
 exit 0
 
