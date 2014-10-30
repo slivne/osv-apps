@@ -172,7 +172,7 @@ prepare_instance_for_test() {
  ec2-get-console-output $TEST_INSTANCE_ID
 
  echo Renaming newly created instance OSv-$OSV_VER
- rename_object $TEST_INSTANCE_ID $TES_INSTANCE_NAME
+ rename_object $TEST_INSTANCE_ID $TEST_INSTANCE_NAME
 
  TEST_INSTANCE_IP=`get_instance_private_ip $TEST_INSTANCE_ID`
 
@@ -206,7 +206,7 @@ fi
 
 for TEST in "$TESTS";
 do
-  echo "=== create instance for test $TEST ==="
+  echo "=== create instance type $INSTANCE_TYPE for test $TEST ==="
   prepare_instance_for_test
 
   sleep 120
