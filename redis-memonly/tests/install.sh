@@ -17,3 +17,7 @@ make
 cd ../..
 
 echo export REDIS_BENCHMARK="`pwd`/upstream/redis/src/redis-benchmark" > tests/setenv.sh
+
+../tester/generic/install.sh
+cat ../tester/generic/setenv.sh >> tests/setenv.sh
+
