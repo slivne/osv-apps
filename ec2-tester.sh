@@ -135,11 +135,6 @@ handle_test_error() {
 }
 
 create_ami() {
- if test x"$OSV_VERSION" = x""; then
-    OSV_VERSION=`$SCRIPTS_ROOT/osv-version.sh` 
- fi
- local TEST_OSV_VER=$OSV_VERSION-ec2-tester-`timestamp`
- local TEST_INSTANCE_NAME=OSv-$TEST_OSV_VER
 
  if test x"$AWS_PLACEMENT_GROUP" != x""; then
   PLACEMENT_GROUP_PARAM="--placement-group $AWS_PLACEMENT_GROUP"
@@ -196,6 +191,12 @@ prepare_image_for_test() {
      $SCRIPTS_ROOT/imgedit.py setargs $IMAGE_NAME $OSV_CMDLINE
   fi
 }
+
+if test x"$OSV_VERSION" = x""; then
+   OSV_VERSION=`$SCRIPTS_ROOT/osv-version.sh` 
+fi
+TEST_OSV_VER=$OSV_VERSION-ec2-tester-`timestamp`
+TEST_INSTANCE_NAME=OSv-$TEST_OSV_VER
 
 if test x"$AMI_ID" = x""; then
    prepare_image_for_test
