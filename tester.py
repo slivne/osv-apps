@@ -48,13 +48,14 @@ def config_merge(a,b,path=None):
     return a
 
 def multi_config_merge(a,b):
-    config_merge(a["default"],b["default"])
-    for config in b:
-        if config != "default":
-           if config in a:
-              config_merge(a[config],b[config])
-           else:
-              a[config] = b[config]
+    if a != b:
+       config_merge(a["default"],b["default"])
+       for config in b:
+           if config != "default":
+              if config in a:
+                 config_merge(a[config],b[config])
+              else:
+                 a[config] = b[config]
 
     for config in a:
         if config != "default":
@@ -97,8 +98,7 @@ def config(dir,params,selector):
        new_config["default"] = default
        if result == "":
           result = new_config
-       else:
-          multi_config_merge(result,new_config)
+       multi_config_merge(result,new_config)
 
     # flatten config
     if selector not in result:
@@ -153,8 +153,8 @@ def template_apply(in_file, params):
     out_fh = open(out_file, 'w')
     try:
        out_fh.write(template.substitute(params))
-    except KeyError:
-       print "missing value for config value in",in_file
+    except KeyError, e:
+       print "missing value for config value in",in_file, " key ", str(e)
        missing_key = True
        sys.exit (1)
     in_fh.close()
