@@ -25,6 +25,7 @@ PARAM_ZONE="--zone"
 PARAM_PLACEMENT_GROUP="--placement-group"
 PARAM_IMAGE="--override-image"
 PARAM_AMI="--ami"
+PARAM_INSTANCE_TYPE="--instance-type"
 PARAM_OSV_VERSION="--osv-version"
 
 print_help() {
@@ -51,6 +52,7 @@ This script receives following command line arguments:
     $PARAM_PLACEMENT_GROUP <placement group> - Placement group for instances created by this script
     $PARAM_IMAGE <image file> - do not rebuild OSv, upload specified image instead
     $PARAM_AMI <image file> - use specified ami
+    $PARAM_INSTANCE_TYPE <ec2 instance type> - instance type to launch
     $PARAM_OSV_VERSION <osv-version> - osv version as string
     <test directories> - list of test directories seperated by comma
 
@@ -70,6 +72,10 @@ do
       ;;
     "$PARAM_AMI")
       AMI_ID=$2
+      shift 2
+      ;;
+    "$PARAM_INSTANCE_TYPE")
+      INSTANCE_TYPE=$2
       shift 2
       ;;
     "$PARAM_REGION")
@@ -112,7 +118,6 @@ if test x"$TESTS" = x""; then
    echo "no tests specified"
    exit 0
 fi
-
 
 
 SCRIPTS_ROOT="$SRC_ROOT/scripts"
