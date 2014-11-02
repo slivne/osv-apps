@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
 
-memslap -s $$sut.ip:11211 --udp --concurrency=10 --execute-number=5
+memaslap -s $$sut.ip:11211 --udp --threads=2 --concurrency=100 --time=60s
 
 $GENERIC_ROOT/rest/base.sh $$sut.ip
