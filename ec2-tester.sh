@@ -207,7 +207,7 @@ if test x"$AMI_ID" = x""; then
    prepare_image_for_test
    create_ami
 fi
-TEST_INSTANCE_NAME=OSv-`get_ami_name_by_id $AMI_ID`-`timestamp`
+TEST_INSTANCE_NAME=OSv-`get_ami_name_by_id $AMI_ID`-ec2-tester-`timestamp`
 
 
 for TEST in "$TESTS";
