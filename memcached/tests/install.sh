@@ -17,7 +17,7 @@ if [ ! -e /usr/local/bin/memaslap ]; then
    cd libmemcached-1.0.18
 #   ./configure
    ./configure --enable-memaslap
-   sudo make install 
+   sudo make install -e LDFLAGS="-L/lib64 -lpthread" 
    cd ..
 fi
 sudo ldconfig /usr/local/lib
