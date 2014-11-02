@@ -167,7 +167,8 @@ prepare_instance_for_test() {
                                                   $PLACEMENT_GROUP_PARAM \
                                                   | tee /dev/tty | ec2_response_value INSTANCE INSTANCE`
  if test x"$TEST_INSTANCE_ID" = x; then
-    handle_error Failed to create template instance.
+    echo "Failed to create template instance."
+    handle_test_error
     break;
  fi
 
