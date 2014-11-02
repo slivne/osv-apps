@@ -5,12 +5,18 @@ tests_dir=${0%/*}
 
 cd $tests_dir
 
+if [ `uname -a | grep Ubuntu | wc -l` = 1 ]; then
+   sudo apt-get install -y libevent-dev 
+else
+   sudo yum install -y libevent-dev
+fi
+
 if [ ! -e /usr/local/bin/memslap ]; then 
    wget https://launchpad.net/libmemcached/1.0/1.0.18/+download/libmemcached-1.0.18.tar.gz
    tar xvf libmemcached-1.0.18.tar.gz
    cd libmemcached-1.0.18
-   ./configure
-#   ./configure --enable-memaslap
+#   ./configure
+   ./configure --enable-memaslap
    sudo make install 
    cd ..
 fi
