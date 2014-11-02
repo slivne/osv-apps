@@ -85,6 +85,10 @@ get_ami_id_by_name() {
  aws ec2 describe-images --filters Name=name,Values=$1 | get_json_value '["Images"][0]["ImageId"]'
 }
 
+get_ami_name_by_id() {
+ aws ec2 describe-images --image-ids $1 | get_json_value '["Images"][0]["Name"]'
+}
+
 get_instance_private_ip() {
  local INSTANCE_ID=$1
  aws ec2 describe-instances --instance-ids $INSTANCE_ID | get_json_value '["Reservations"][0]["Instances"][0]["PrivateIpAddress"]'
@@ -123,6 +127,11 @@ delete_volume() {
 delete_instance() {
  local INSTANCE_ID=$1
  aws ec2 terminate-instances --instance-ids $INSTANCE_ID
+}
+
+delete_ami() {
+ local AMI_ID=$1
+ aws ec2 deregister-image --image-id $AMI_ID
 }
 
 wait_for_instance_state() {
