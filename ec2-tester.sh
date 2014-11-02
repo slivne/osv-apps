@@ -152,7 +152,7 @@ create_ami() {
                               --zone $AWS_ZONE \
                               --override-image $IMAGE_NAME \
                               $PLACEMENT_GROUP_PARAM || handle_test_error
- AMI_ID=`get_ami_id_by_name $TEST_OSV_VER`
+ AMI_ID=`get_ami_id_by_name OSv-$TEST_OSV_VER`
  echo "AMI created $AMI_ID"
 }
 
