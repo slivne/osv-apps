@@ -5,7 +5,7 @@ tests_dir=${0%/*}
 
 cd $tests_dir
 
-if [ ! -e /usr/local/bin/memaslap ]; then 
+if [ ! -e /usr/local/bin/memslap ]; then 
    wget https://launchpad.net/libmemcached/1.0/1.0.18/+download/libmemcached-1.0.18.tar.gz
    tar xvf libmemcached-1.0.18.tar.gz
    cd libmemcached-1.0.18
