@@ -12,6 +12,7 @@ if [ ! -e /usr/bin/memaslap ]; then
    ./configure
 #   ./configure --enable-memaslap
    sudo make install 
+   sudo ldconfig /usr/local/lib
    cd ..
 fi
 
