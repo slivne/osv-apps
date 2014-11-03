@@ -215,7 +215,7 @@ TEST_INSTANCE_NAME=OSv-`get_ami_name_by_id $AMI_ID`-ec2-tester-`timestamp`
 any_test_failed=0
 for TEST in "$TESTS";
 do
-  local fail=0
+  fail=0
   echo "=== create instance type $INSTANCE_TYPE for test $TEST ==="
   prepare_instance_for_test
 
