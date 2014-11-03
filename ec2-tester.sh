@@ -212,6 +212,7 @@ fi
 TEST_INSTANCE_NAME=OSv-`get_ami_name_by_id $AMI_ID`-ec2-tester-`timestamp`
 
 
+result=0
 for TEST in "$TESTS";
 do
   echo "=== create instance type $INSTANCE_TYPE for test $TEST ==="
@@ -220,13 +221,13 @@ do
   sleep 120
 
   echo "=== Ping Host ==="
-  ping -c 4 $TEST_INSTANCE_IP || post_test_cleanup
+  ping -c 4 $TEST_INSTANCE_IP || (result=1 && post_test_cleanup)
 
   echo "=== Run tester ==="
   # TODO FIX LOCAL IP
   selector="ec2_$INSTANCE_TYPE"
   echo "$SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST"
-  $SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST || post_test_cleanup
+  $SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST || (result = 1 && post_test_cleanup)
 
   ec2-get-console-output $TEST_INSTANCE_ID
 
@@ -234,5 +235,5 @@ do
   post_test_cleanup
 done
 
-exit 0
+exit result
 
