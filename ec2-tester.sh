@@ -212,35 +212,37 @@ fi
 TEST_INSTANCE_NAME=OSv-`get_ami_name_by_id $AMI_ID`-ec2-tester-`timestamp`
 
 
-any_test_failed=0
+ANY_TEST_FAILED=0
 for TEST in "$TESTS";
 do
-  fail=0
+  FAIL=0
   echo "=== create instance type $INSTANCE_TYPE for test $TEST ==="
   prepare_instance_for_test
 
   sleep 120
 
   echo "=== Ping Host ==="
-  ping -c 4 $TEST_INSTANCE_IP || (fail=1)
+  ping -c 4 $TEST_INSTANCE_IP || (FAIL=1)
 
-  if test $fail = 0; then
+  if test $FAIL = 0; then
      echo "=== Run tester ==="
      # TODO FIX LOCAL IP
      selector="ec2_$INSTANCE_TYPE"
      echo "$SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST"
-     $SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST || (fail=1)
+     $SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST || (FAIL=1)
+     echo "test result $FAIL"
   fi
   ec2-get-console-output $TEST_INSTANCE_ID
    
   echo "=== cleaning up for test $TEST ==="
   post_test_cleanup
 
-  if test $fail != 0; then
+ echo "test result $FAIL"
+  if test $FAIL != 0; then
      echo "=== test $TEST failed ==="
-     any_test_failed=1
+     ANY_TEST_FAILED=1
   fi
 done
 
-exit $any_test_failed
+exit $ANY_TEST_FAILED
 
