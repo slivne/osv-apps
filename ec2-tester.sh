@@ -236,7 +236,7 @@ do
   echo "=== cleaning up for test $TEST ==="
   post_test_cleanup
 
-  if fail != 0; then
+  if $fail != 0; then
      echo "=== test $TEST failed ==="
      any_test_failed=1
   fi
