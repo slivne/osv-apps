@@ -24,6 +24,16 @@ from string import Template
 from os import listdir
 from os.path import isfile, join
 from copy import deepcopy
+from threading import Timer
+
+class TimeoutTimer():
+    def __init__(self,value):
+        self.awesum="hh"
+        self.timer = Timer(value,self.timeout)
+        self.timer.start()
+    def timeout(self):
+        os._exit(1)
+
 
 class ConfigTemplate(Template):
     delimiter = '$$'
@@ -191,9 +201,17 @@ def extract_config_params_from_args(args):
 
 def run(args):
     compile(args)
+
     error = False
     for dir in args.directory:
         print "running files in",dir
+        
+        # timeout setting
+        params = extract_config_params_from_args(args)
+        configuration = config(dir,params,args.config_selection)
+        if "tester.timeout" in configuration:
+           timeout = TimeoutTimer(int(configuration["tester.timeout"]))
+
         files = []
         for (dirpath, dirnames, filenames) in os.walk(dir):
             for filename in get_templates_from_list(filenames):
