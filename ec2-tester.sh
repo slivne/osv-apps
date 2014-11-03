@@ -166,7 +166,7 @@ prepare_instance_for_test() {
                                                   --instance-type $INSTANCE_TYPE \
                                                   $PLACEMENT_GROUP_PARAM \
                                                   | tee /dev/tty | ec2_response_value INSTANCE INSTANCE`
- if test x"$TEST_INSTANCE_ID" = x; then
+ if test x"$TEST_INSTANCE_ID" = x""; then
     echo "Failed to create template instance."
     handle_test_error
     break;
@@ -212,30 +212,35 @@ fi
 TEST_INSTANCE_NAME=OSv-`get_ami_name_by_id $AMI_ID`-ec2-tester-`timestamp`
 
 
-result_all_tests=0
+any_test_failed=0
 for TEST in "$TESTS";
 do
+  local fail=0
   echo "=== create instance type $INSTANCE_TYPE for test $TEST ==="
   prepare_instance_for_test
 
   sleep 120
 
   echo "=== Ping Host ==="
-  ping -c 4 $TEST_INSTANCE_IP || ((result_all_tests=1) && post_test_cleanup)
+  ping -c 4 $TEST_INSTANCE_IP || (fail=1)
 
-  if test x"$TEST_INSTANCE_ID" != x""; then
+  if test $fail = 0; then
      echo "=== Run tester ==="
      # TODO FIX LOCAL IP
      selector="ec2_$INSTANCE_TYPE"
      echo "$SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST"
-     $SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST || (result_all_tests=1)
-
-     ec2-get-console-output $TEST_INSTANCE_ID
+     $SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST || (fail=1)
   fi
+  ec2-get-console-output $TEST_INSTANCE_ID
    
   echo "=== cleaning up for test $TEST ==="
   post_test_cleanup
+
+  if fail != 0; then
+     echo "=== test $TEST failed ==="
+     any_test_failed=1
+  fi
 done
 
-exit $result_all_tests
+exit $any_test_failed
 
