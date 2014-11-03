@@ -221,13 +221,13 @@ do
   sleep 120
 
   echo "=== Ping Host ==="
-  ping -c 4 $TEST_INSTANCE_IP || (result=1 && post_test_cleanup)
+  ping -c 4 $TEST_INSTANCE_IP || ((result=1) && post_test_cleanup)
 
   echo "=== Run tester ==="
   # TODO FIX LOCAL IP
   selector="ec2_$INSTANCE_TYPE"
   echo "$SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST"
-  $SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST || (result = 1 && post_test_cleanup)
+  $SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST || ((result=1) && post_test_cleanup)
 
   ec2-get-console-output $TEST_INSTANCE_ID
 
