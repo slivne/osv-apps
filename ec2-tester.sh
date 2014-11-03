@@ -223,7 +223,7 @@ do
   echo "=== Ping Host ==="
   ping -c 4 $TEST_INSTANCE_IP || ((result_all_tests=1) && post_test_cleanup)
 
-  id test x"$TEST_INSTANCE_ID" != x""; then
+  if test x"$TEST_INSTANCE_ID" != x""; then
      echo "=== Run tester ==="
      # TODO FIX LOCAL IP
      selector="ec2_$INSTANCE_TYPE"
