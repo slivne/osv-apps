@@ -153,8 +153,9 @@ def template_prepare(params,dir):
     for (dirpath, dirnames, filenames) in os.walk(dir):
         for filename in get_templates_from_list(filenames):
             template_apply(os.path.join(dirpath,filename),params)
-        for dir in fnmatch.filter (dirnames,"[a-zA-Z0-9].*"):
-            template_prepare(params,dir)
+        break
+#        for dir in fnmatch.filter (dirnames,"[a-zA-Z0-9].*"):
+#            template_prepare(params,dir)
 
 def template_apply(in_file, params):
     out_file = get_file_from_template(in_file)
@@ -216,6 +217,7 @@ def run(args):
         for (dirpath, dirnames, filenames) in os.walk(dir):
             for filename in get_templates_from_list(filenames):
                 files.append(filename)
+            break
         files.sort(cmp=template_compare_filename)
         for file in files:
             file_return = run_file(os.path.join(dir,get_file_from_template(file)))
