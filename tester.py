@@ -33,7 +33,6 @@ class TimeoutTimer():
         self.timer.start()
 
     def timeout(self):
-        print "timeout"
         os._exit(1)
 
     def cancel(self):

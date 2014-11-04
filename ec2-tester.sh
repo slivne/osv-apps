@@ -232,14 +232,12 @@ do
      echo "$SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST"
      $SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST
      FAILE=$?
-     echo "test result $? $FAIL" 
   fi
   ec2-get-console-output $TEST_INSTANCE_ID
    
   echo "=== cleaning up for test $TEST ==="
   post_test_cleanup
 
- echo "test result $FAIL"
   if test $FAIL != 0; then
      echo "=== test $TEST failed ==="
      ANY_TEST_FAILED=1
