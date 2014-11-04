@@ -222,14 +222,16 @@ do
   sleep 120
 
   echo "=== Ping Host ==="
-  ping -c 4 $TEST_INSTANCE_IP || (FAIL=1)
+  ping -c 4 $TEST_INSTANCE_IP
+  FAIL=$?
 
   if test $FAIL = 0; then
      echo "=== Run tester ==="
      # TODO FIX LOCAL IP
      selector="ec2_$INSTANCE_TYPE"
      echo "$SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST"
-     $SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST || (FAIL=1)
+     $SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST
+     FAILE=$?
      echo "test result $? $FAIL" 
   fi
   ec2-get-console-output $TEST_INSTANCE_ID
