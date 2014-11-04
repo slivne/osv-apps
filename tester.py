@@ -31,13 +31,19 @@ class TimeoutTimer():
         self.awesum="hh"
         self.timer = Timer(value,self.timeout)
         self.timer.start()
+
     def timeout(self):
+        print "timeout"
         os._exit(1)
+
+    def cancel(self):
+        self.timer.cancel()
 
 
 class ConfigTemplate(Template):
     delimiter = '$$'
     idpattern = r'[a-z][\.\-_a-z0-9]*'
+
 #
 # config files
 #
@@ -210,6 +216,7 @@ def run(args):
         # timeout setting
         params = extract_config_params_from_args(args)
         configuration = config(dir,params,args.config_selection)
+        timeout = None
         if "tester.timeout" in configuration:
            timeout = TimeoutTimer(int(configuration["tester.timeout"]))
 
@@ -224,9 +231,14 @@ def run(args):
             if file_return != 0:
                error = True
                break
+
+        if timeout:
+           timeout.cancel()
         if error:
-           break;
+           break
+
     if error:
+        print "error occured exiting"
         sys.exit(1)
 
 def compile(args):
@@ -245,7 +257,6 @@ def config_get_command(args):
            print configuration[args.param]
            return
     print ""   
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser('Tester')

@@ -230,7 +230,7 @@ do
      selector="ec2_$INSTANCE_TYPE"
      echo "$SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST"
      $SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST || (FAIL=1)
-     echo "test result $FAIL $?"
+     echo "test result $? $FAIL" 
   fi
   ec2-get-console-output $TEST_INSTANCE_ID
    
