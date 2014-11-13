@@ -8,7 +8,7 @@ cd $tests_dir
 if [ `uname -a | grep Ubuntu | wc -l` = 1 ]; then
    sudo apt-get install -y libevent-dev 
 else
-   sudo yum install -y libevent-dev
+   sudo yum install -y libevent-devel
 fi
 
 if [ ! -e /usr/local/bin/memaslap ]; then 
