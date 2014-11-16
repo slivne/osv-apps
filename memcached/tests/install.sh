@@ -11,7 +11,7 @@ else
    sudo yum install -y libevent-devel
 fi
 
-if [ ! -e /usr/local/bin/memaslap ]; then 
+if [ ! -e /usr/local/bin/memaslap ] && [ ! -e /usr/bin/memaslap ] ; then 
    wget https://launchpad.net/libmemcached/1.0/1.0.18/+download/libmemcached-1.0.18.tar.gz
    tar xvf libmemcached-1.0.18.tar.gz
    cd libmemcached-1.0.18
