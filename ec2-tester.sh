@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh 
 #
 #  Copyright (C) 2013 Cloudius Systems, Ltd.
 #
@@ -16,6 +16,7 @@ IMAGE_NAME=$SRC_ROOT/build/release.x64/usr.img
 AMI_ID=""
 OSV_VERSION=""
 TESTS=""
+SUT_OS=""
 
 PARAM_HELP_LONG="--help"
 PARAM_HELP="-h"
@@ -27,6 +28,7 @@ PARAM_IMAGE="--override-image"
 PARAM_AMI="--ami"
 PARAM_INSTANCE_TYPE="--instance-type"
 PARAM_OSV_VERSION="--osv-version"
+PARAM_SUT_OS="--sut-os"
 
 print_help() {
  cat <<HLPEND
@@ -54,6 +56,7 @@ This script receives following command line arguments:
     $PARAM_AMI <image file> - use specified ami
     $PARAM_INSTANCE_TYPE <ec2 instance type> - instance type to launch
     $PARAM_OSV_VERSION <osv-version> - osv version as string
+    $PARAM_SUT_OS <os> - system uder os type
     <test directories> - list of test directories seperated by comma
 
 HLPEND
@@ -92,6 +95,10 @@ do
       ;;
     "$PARAM_OSV_VERSION")
       OSV_VERSION=$2
+      shift 2
+      ;;
+    "$PARAM_SUT_OS")
+      SUT_OS=$2
       shift 2
       ;;
     "$PARAM_HELP")
@@ -158,14 +165,28 @@ create_ami() {
 
 
 prepare_instance_for_test() {
+ PLACEMENT_GROUP_PARAM=""
  if test x"$AWS_PLACEMENT_GROUP" != x""; then
   PLACEMENT_GROUP_PARAM="--placement-group $AWS_PLACEMENT_GROUP"
+ fi
+
+ EC2_USER_DATA_PARAM=""
+ if test x"$SUT_OS" != x""; then
+    selector="ec2_$INSTANCE_TYPE"
+    EC2_USER_DATA="`$SCRIPTS_ROOT/tester.py config-get sut.os.linux.ec2_user_data --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TESTS`"
+    EC2_USER_DATA_FILE="/tmp/ec2_user_data.$$"
+    if test x"$EC2_USER_DATA" != x""; then
+       $SCRIPTS_ROOT/tester.py config-get sut.os.$SUT_OS.ec2_user_data --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TESTS > $EC2_USER_DATA_FILE
+       EC2_USER_DATA_PARAM="--user-data-file $EC2_USER_DATA_FILE"
+    fi
  fi
 
  TEST_INSTANCE_ID=`ec2-run-instances $AMI_ID --availability-zone $AWS_ZONE \
                                                   --instance-type $INSTANCE_TYPE \
                                                   $PLACEMENT_GROUP_PARAM \
+                                                  $EC2_USER_DATA_PARAM \
                                                   | tee /dev/tty | ec2_response_value INSTANCE INSTANCE`
+
  if test x"$TEST_INSTANCE_ID" = x""; then
     echo "Failed to create template instance."
     handle_test_error
@@ -191,7 +212,7 @@ prepare_instance_for_test() {
 prepare_image_for_test() {
   echo "=== Update image according to tests ==="
   selector="ec2_$INSTANCE_TYPE"
-  OSV_CMDLINE="`$SCRIPTS_ROOT/tester.py config-get sut.osv.cmdline --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TESTS`"
+  OSV_CMDLINE="`$SCRIPTS_ROOT/tester.py config-get sut.os.osv.cmdline --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TESTS`"
   # TODO assuming all tests cmdlines are the same / all instance types are the same
   if test x"$OSV_CMDLINE" != x""; then
      echo "$SCRIPTS_ROOT/imgedit.py setargs $IMAGE_NAME $OSV_CMDLINE"
@@ -209,6 +230,7 @@ if test x"$AMI_ID" = x""; then
    prepare_image_for_test
    create_ami
 fi
+AMI_NAME=`get_ami_name_by_id $AMI_ID`
 TEST_INSTANCE_NAME=OSv-`get_ami_name_by_id $AMI_ID`-ec2-tester-`timestamp`
 
 
