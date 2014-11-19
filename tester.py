@@ -103,7 +103,7 @@ def update_config_file(conf, file_name):
     for k,v in conf.items():
         if isinstance(v, dict):
             update_config_file(v, file_name)
-        else  :          
+        elif isinstance(v, str) :
             m = p.match(v)
             if m:
                 conf[k] = get_file(file_name, m.group(1))
