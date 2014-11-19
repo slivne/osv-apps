@@ -247,14 +247,25 @@ def compile(args):
         configuration = config(dir,params,args.config_selection)
         template_prepare(configuration,dir)
 
+def print_file(dir, name):
+    if os.path.isabs(name) == False:
+        name = os.path.join(dir,name)
+    f = open(name)
+    print f.read()
+    f.close()
 
 def config_get_command(args):
     params = extract_config_params_from_args(args)
     if args.directory and len(args.directory) > 0:
         configuration = config(args.directory[0],params,args.config_selection)
         if args.param in configuration:
-           print configuration[args.param]
-           return
+            p = re.compile('//file:(.*)\s*')
+            m = p.match(val)
+            if m:
+                print_file(args.directory, m.group(1))
+            else:
+                print configuration[args.param]
+                return
     print ""   
 
 if __name__ == "__main__":
