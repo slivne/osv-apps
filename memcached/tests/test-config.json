@@ -6,7 +6,8 @@
      "ip" : "$$sut.ip",
      "os" : {
           "linux" : {
-               "ec2_user_data" : "#!/bin/bash\necho start >> /tmp/boot\nyum update -y\nyum install -y wget\nyum install -y gcc\ncd /tmp\nmkdir a\ncd a\nwget https://github.com/downloads/libevent/libevent/libevent-2.0.21-stable.tar.gz\ntar xzvf libevent-2.0.21-stable.tar.gz\ncd libevent-2.0.21-stable\n./configure\nmake \nmake install\nldconfig /usr/local/lib\ncd ..\nwget http://memcached.org/latest\ntar -zxvf latest\ncd memcached-1.4.??\n./configure \nmake\nmake test\nmake install\nnohup memcached -u root &\necho end >> /tmp/boot"
+          	   "ec2_user_data": "/file:linux_setup.sh",
+               "ec2_user_data2" : "#!/bin/bash\necho start >> /tmp/boot\nyum update -y\nyum install -y wget\nyum install -y gcc\ncd /tmp\nmkdir a\ncd a\nwget https://github.com/downloads/libevent/libevent/libevent-2.0.21-stable.tar.gz\ntar xzvf libevent-2.0.21-stable.tar.gz\ncd libevent-2.0.21-stable\n./configure\nmake \nmake install\nldconfig /usr/local/lib\ncd ..\nwget http://memcached.org/latest\ntar -zxvf latest\ncd memcached-1.4.??\n./configure \nmake\nmake test\nmake install\nnohup memcached -u root &\necho end >> /tmp/boot"
           }
       }
   }
