@@ -2,9 +2,8 @@
 import argparse
 import re
 
-
 def num(line, key, val):
-    print '"' + key + '": ' + val + "," 
+    print '"' + key + '": ' + val + ","
 
 def find_float(line, key, val):
     p = re.compile('[^\d]*([\d\.]+).*')
@@ -30,7 +29,7 @@ def tm(line, key, val):
        num(line, key, m.group(1))
 
 def str(line, key, val):
-    print '"' + key + '": "' + val + '",' 
+    print '"' + key + '": "' + val + '",'
 
 def footter(line):
     values = re.split('([^\s][^:]*:\s*[^\s]*)', line)
@@ -38,7 +37,7 @@ def footter(line):
         parse_line(v)
 
 match = {"cmd_get" : num, "get_misses" : num, "servers" : str, "cmd_set" : num
-         , "threads count" : num, "concurrency" : num, "set proportion" : find_float, 
+         , "threads count" : num, "concurrency" : num, "set proportion" : find_float,
          "get proportion": find_float, "written_bytes" : num, "read_bytes" : num, "object_bytes" : num,
          "windows size" : k_num, "run time" : tm, "Run time" : tm, "Ops" : num, "TPS" : num, "Net_rate" : find_float}
 
@@ -53,22 +52,43 @@ def parse_line(line):
         if m:
             f = match.get(m.group(1))
             if f:
-                f(line, m.group(1),  m.group(2))
-            else:    
-                print ">" + line
+                f(line, m.group(1), m.group(2))
+def non_empty(line):
+    p = re.compile('^\s*$')
+    return not p.match(line)
 
-def parse_file(name):        
+def parse_file(name, delim):
+    p = re.compile('\s*' + delim + '\s*')
     f = open(name, 'r')
-    print ("{")
+    if delim != '':
+        print '['
+    strt = False
+    found = False
     for line in f:
-        parse_line(line)
-    print ('"file": "' + name +'"')
-    print ("}")
+        if delim != '' and p.match(line):
+            print ('"file": "' + name + '"')
+            print ("}")
+            strt = False
+        elif non_empty(line):
+            if not strt:
+                if found:
+                    print ","
+                found = True
+                print ("{")
+                strt = True
+            parse_line(line)
+    if delim == '':
+        print ('"file": "' + name + '"')
+        print ("}")
+    else:
+        print ']'
+
     f.close()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser('memaslap2json')
-    parser.add_argument('file',nargs='+',help='file to convert')
-    args=parser.parse_args()
+    parser.add_argument('file', nargs='+', help='file to convert')
+    parser.add_argument('--delimiter', default='', nargs='?')
+    args = parser.parse_args()
     for f in args.file:
-        parse_file(f) 
+        parse_file(f, args.delimiter)
