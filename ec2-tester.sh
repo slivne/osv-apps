@@ -141,7 +141,7 @@ SCRIPTS_ROOT="$SRC_ROOT/scripts"
 
 post_test_cleanup() {
  if test x"$TEST_INSTANCE_ID" != x""; then
-	if $NO_KILL; then
+	if test $NO_KILL = 1; then
 		echo "stop_instance_forcibly " $TEST_INSTANCE_ID > clean_test.sh
 		echo "wait_for_instance_shutdown " $TEST_INSTANCE_ID >> clean_test.sh
 		echo "delete_instance " $TEST_INSTANCE_ID >> clean_test.sh
