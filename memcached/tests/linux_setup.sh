@@ -1,4 +1,4 @@
-"#!/bin/bash
+#!/bin/bash
 echo start >> /tmp/boot
 yum update -y
 yum install -y wget
@@ -22,4 +22,4 @@ make
 make test
 make install
 nohup memcached -u root -t 1 -m 4048&
-echo end >> /tmp/boot"
+echo end >> /tmp/boot
