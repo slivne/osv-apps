@@ -17,6 +17,7 @@ AMI_ID=""
 OSV_VERSION=""
 TESTS=""
 SUT_OS=""
+NO_KILL=0
 
 PARAM_HELP_LONG="--help"
 PARAM_HELP="-h"
@@ -29,6 +30,7 @@ PARAM_AMI="--ami"
 PARAM_INSTANCE_TYPE="--instance-type"
 PARAM_OSV_VERSION="--osv-version"
 PARAM_SUT_OS="--sut-os"
+PARAM_NO_KILL="--no-kill"
 
 print_help() {
  cat <<HLPEND
@@ -56,7 +58,8 @@ This script receives following command line arguments:
     $PARAM_AMI <image file> - use specified ami
     $PARAM_INSTANCE_TYPE <ec2 instance type> - instance type to launch
     $PARAM_OSV_VERSION <osv-version> - osv version as string
-    $PARAM_SUT_OS <os> - system uder os type
+    $PARAM_SUT_OS <os> - system under test os type
+    $PARAM_NO_KILL - do not kill the SUT instances
     <test directories> - list of test directories seperated by comma
 
 HLPEND
@@ -101,6 +104,11 @@ do
       SUT_OS=$2
       shift 2
       ;;
+    "$PARAM_NO_KILL")
+      NO_KILL=1
+	echo "instance will not be terminated, make sure to terminate it after the test"
+      shift 1
+      ;;
     "$PARAM_HELP")
       print_help
       exit 0
@@ -133,10 +141,16 @@ SCRIPTS_ROOT="$SRC_ROOT/scripts"
 
 post_test_cleanup() {
  if test x"$TEST_INSTANCE_ID" != x""; then
-    stop_instance_forcibly $TEST_INSTANCE_ID
-    wait_for_instance_shutdown $TEST_INSTANCE_ID
-    delete_instance $TEST_INSTANCE_ID
-    TEST_INSTANCE_ID=""
+	if $NO_KILL; then
+		echo "stop_instance_forcibly " $TEST_INSTANCE_ID > clean_test.sh
+		echo "wait_for_instance_shutdown " $TEST_INSTANCE_ID >> clean_test.sh
+		echo "delete_instance " $TEST_INSTANCE_ID >> clean_test.sh
+	elif
+    	stop_instance_forcibly $TEST_INSTANCE_ID
+    	wait_for_instance_shutdown $TEST_INSTANCE_ID
+    	delete_instance $TEST_INSTANCE_ID    	
+	fi
+	TEST_INSTANCE_ID=""
  fi
 }
 
