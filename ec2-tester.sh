@@ -145,7 +145,7 @@ post_test_cleanup() {
 		echo "stop_instance_forcibly " $TEST_INSTANCE_ID > clean_test.sh
 		echo "wait_for_instance_shutdown " $TEST_INSTANCE_ID >> clean_test.sh
 		echo "delete_instance " $TEST_INSTANCE_ID >> clean_test.sh
-	elif
+	else
     	stop_instance_forcibly $TEST_INSTANCE_ID
     	wait_for_instance_shutdown $TEST_INSTANCE_ID
     	delete_instance $TEST_INSTANCE_ID    	
