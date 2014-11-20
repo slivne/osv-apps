@@ -241,7 +241,7 @@ do
   echo "=== create instance type $INSTANCE_TYPE for test $TEST ==="
   prepare_instance_for_test
 
-  sleep 120
+sleep 240
 
   echo "=== Ping Host ==="
   ping -c 4 $TEST_INSTANCE_IP
