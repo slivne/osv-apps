@@ -3,13 +3,14 @@
       "ycsb" : {
           "fieldcount" : "20",
           "recordcount" : "100000",
+          "requestdistribution" : "zipfian",
           "load" : {
               "operationcount" : "100000",
               "threads" : "100"
           },
           "run" : {
               "iterations" : "4",
-              "operationcount" : "10000",
+              "maxoperationcount" : "10000",
               "maxexecutiontimeinseconds" : "600",
               "threads" : "64 128 200 400"
           }

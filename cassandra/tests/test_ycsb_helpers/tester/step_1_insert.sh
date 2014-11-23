@@ -12,5 +12,5 @@ EOF
 
 $CASSANDRA_CLI -h $1 -f /tmp/setup-ycsb.cql
 
-$YCSB_ROOT/bin/ycsb load cassandra-10 -threads $3 -p operationcount=$4 -p recordcount=$5 -p hosts=$1 -P $YCSB_ROOT/workloads/$2 -s 
+$YCSB_ROOT/bin/ycsb load cassandra-10 -threads $3 -p operationcount=$4 -p recordcount=$5 -p fieldcount=$6 -p requestdistribution=$7 -p hosts=$1 -P $YCSB_ROOT/workloads/$2 -s 
 
