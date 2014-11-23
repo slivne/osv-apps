@@ -19,7 +19,7 @@ PARAM_MODULES="--modules-list"
 PARAM_REGION="--region"
 PARAM_ZONE="--zone"
 PARAM_PLACEMENT_GROUP="--placement-group"
-PARAM_EC2_KEY_NAME="--ec2-key"
+PARAM_EC2_KEY_NAME="-k"
 PARAM_IMAGE_SIZE="--image-size"
 
 MODULES_LIST=default
@@ -119,7 +119,6 @@ do
       EC2_KEY_NAME=$2
       shift 2
       ;;
-    
     "$PARAM_IMAGE_SIZE")
       if [ $2 -ne "" ]
       then
