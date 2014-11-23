@@ -16,8 +16,8 @@
   
   "ec2_m3.xlarge" : {
       "tester" : {
-          "recordcount" : "800000",
           "ycsb" : {
+             "recordcount" : "800000",
              "run" : {
                  "operationcount" : "2000000"
              }
@@ -27,8 +27,8 @@
  
   "huginn-muninn" : {
       "tester" : {
-          "recordcount" : "800000",
           "ycsb" : {
+             "recordcount" : "800000",
              "run" : {
                  "operationcount" : "8000000"
              }
