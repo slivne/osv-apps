@@ -167,6 +167,10 @@ wait_for_instance_shutdown() {
  wait_for_instance_state $1 stopped
 }
 
+wait_for_instance_delete() {
+ wait_for_instance_state $1 terminated
+}
+
 wait_for_volume_state() {
  local VOLUME_ID=$1
  local REQUESTED_STATE=$2

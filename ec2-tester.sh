@@ -133,9 +133,8 @@ SCRIPTS_ROOT="$SRC_ROOT/scripts"
 
 post_test_cleanup() {
  if test x"$TEST_INSTANCE_ID" != x""; then
-    stop_instance_forcibly $TEST_INSTANCE_ID
-    wait_for_instance_shutdown $TEST_INSTANCE_ID
     delete_instance $TEST_INSTANCE_ID
+    wait_for_instance_delete $TEST_INSTANCE_ID
     TEST_INSTANCE_ID=""
  fi
 }
