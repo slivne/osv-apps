@@ -174,7 +174,7 @@ create_ami() {
 
  local EC2_KEYS=""
  if test  x"$EC2_KEY_NAME" != x""; then
-	EC2_KEYS=" -k $EC2_KEY_NAME"
+	EC2_KEYS=" --ec2-key $EC2_KEY_NAME"
  fi
 
  echo "=== Create OSv instance ==="
