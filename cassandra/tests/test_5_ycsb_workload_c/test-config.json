@@ -1,6 +1,7 @@
 {
   "tester" : {
       "ycsb" : {
+          "fieldcount" : "20",
           "recordcount" : "100000",
           "load" : {
               "operationcount" : "100000",
@@ -17,9 +18,10 @@
   "ec2_m3.xlarge" : {
       "tester" : {
           "ycsb" : {
-             "recordcount" : "800000",
+             "recordcount" : "1500000",
              "run" : {
-                 "operationcount" : "4000000"
+                 "maxoperationcount" : "4000000"
+                 "maxexecutiontimeinseconds" : "600"
              }
           }
        }
