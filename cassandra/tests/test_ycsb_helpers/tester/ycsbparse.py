@@ -14,7 +14,7 @@ def meanstdv(x):
         variance = variance + (a - mean)**2 
     variance = variance / float(n)
     std = math.sqrt(variance) 
-    rsd = std / mean
+    rsd = std / mean * 100
     return mean, variance, std, rsd
 
 class ycsb_output:
