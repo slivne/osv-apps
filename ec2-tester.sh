@@ -31,6 +31,7 @@ PARAM_INSTANCE_TYPE="--instance-type"
 PARAM_OSV_VERSION="--osv-version"
 PARAM_SUT_OS="--sut-os"
 PARAM_NO_KILL="--no-kill"
+PARAM_EC2_KEY_NAME="--ec2-key"
 
 print_help() {
  cat <<HLPEND
@@ -60,6 +61,7 @@ This script receives following command line arguments:
     $PARAM_OSV_VERSION <osv-version> - osv version as string
     $PARAM_SUT_OS <os> - system under test os type
     $PARAM_NO_KILL - do not kill the SUT instances
+    $PARAM_EC2_KEY_NAME <ec2-keys> - use the provided EC2 SSH key names
     <test directories> - list of test directories seperated by comma
 
 HLPEND
@@ -109,6 +111,10 @@ do
 	echo "instance will not be terminated, make sure to terminate it after the test"
       shift 1
       ;;
+    "PARAM_EC2_KEY_NAME")
+      EC2_KEY_NAME=$2
+      shift 2
+      ;;    
     "$PARAM_HELP")
       print_help
       exit 0
@@ -166,12 +172,18 @@ create_ami() {
   PLACEMENT_GROUP_PARAM="--placement-group $AWS_PLACEMENT_GROUP"
  fi
 
+ local EC2_KEYS=""
+ if test  x"$EC2_KEY_NAME" != x""; then
+	EC2_KEYS=" -k $EC2_KEY_NAME"
+ fi
+
  echo "=== Create OSv instance ==="
  $SCRIPTS_ROOT/release-ec2.sh --private-ami-only \
                               --override-version $TEST_OSV_VER \
                               --region $AWS_REGION \
                               --zone $AWS_ZONE \
                               --override-image $IMAGE_NAME \
+                            $EC2_KEYS \
                               $PLACEMENT_GROUP_PARAM || handle_test_error
  AMI_ID=`get_ami_id_by_name OSv-$TEST_OSV_VER`
  echo "AMI created $AMI_ID"
