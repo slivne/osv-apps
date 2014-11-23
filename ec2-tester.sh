@@ -111,7 +111,7 @@ do
 	echo "instance will not be terminated, make sure to terminate it after the test"
       shift 1
       ;;
-    "PARAM_EC2_KEY_NAME")
+    "$PARAM_EC2_KEY_NAME")
       EC2_KEY_NAME=$2
       shift 2
       ;;    
