@@ -229,7 +229,7 @@ update_osv_instance_for_test() {
         curl -X POST -d cmdline="$TEST_CMDLINE" http://$TEST_INSTANCE_IP:8000/os/cmdline 
         stop_instance_forcibly $TEST_INSTANCE_ID
         wait_for_instance_shutdown $TEST_INSTANCE_ID
-        start_instance $TEST_INSTANCE_ID
+        start_instances $TEST_INSTANCE_ID
         wait_for_instance_startup $TEST_INSTANCE_ID 300 || handle_test_error
      fi
   fi
