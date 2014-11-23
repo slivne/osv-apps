@@ -7,7 +7,7 @@
               "iterations" : "4"
           },
           "run" : {
-              "requests" : "100000"
+              "requests" : "1000000"
           }
       }
   }
