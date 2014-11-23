@@ -219,6 +219,22 @@ prepare_image_for_test() {
   fi
 }
 
+update_osv_instance_for_test() {
+  echo "=== Update instance $TEST_INSTANCE_ID according to test $TEST ==="
+  selector="ec2_$INSTANCE_TYPE"
+  TEST_CMDLINE="`$SCRIPTS_ROOT/tester.py config-get sut.os.osv.cmdline --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST`"
+  if test x"$TEST_CMDLINE" != x""; then
+     OSV_CMDLINE=`curl http://$TEST_INSTANCE_IP:8000/os/cmdline`
+     if test x"$OSV_CMDLINE" != x "$TEST_CMDLINE"; then
+        curl -X POST -d cmdline="$TEST_CMDLINE" http://$TEST_INSTANCE_IP:8000/os/cmdline 
+        stop_instance_forcibly $TEST_INSTANCE_ID
+        wait_for_instance_shutdown $TEST_INSTANCE_ID
+        start_instance $TEST_INSTANCE_ID
+        wait_for_instance_startup $TEST_INSTANCE_ID 300 || handle_test_error
+     fi
+  fi
+}
+
 if test x"$OSV_VERSION" = x""; then
    OSV_VERSION=`$SCRIPTS_ROOT/osv-version.sh` 
 fi
@@ -247,6 +263,10 @@ do
   FAIL=$?
 
   if test $FAIL = 0; then
+     if test x"$SUT_OS" == xosv; then
+        update_osv_instance_for_test
+     fi
+     
      echo "=== Run tester ==="
      # TODO FIX LOCAL IP
      selector="ec2_$INSTANCE_TYPE"
