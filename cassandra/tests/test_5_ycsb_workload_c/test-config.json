@@ -10,6 +10,7 @@
           "run" : {
               "iterations" : "4",
               "operationcount" : "10000",
+              "maxexecutiontimeinseconds" : "600",
               "threads" : "64 128 200 400"
           }
       }
@@ -21,7 +22,6 @@
              "recordcount" : "1500000",
              "run" : {
                  "maxoperationcount" : "4000000"
-                 "maxexecutiontimeinseconds" : "600"
              }
           }
        }
