@@ -14,7 +14,8 @@ def meanstdv(x):
         variance = variance + (a - mean)**2 
     variance = variance / float(n)
     std = math.sqrt(variance) 
-    return mean, variance, std
+    rsd = std / mean
+    return mean, variance, std, rsd
 
 class ycsb_output:
     iteration_partitioner = r"cs>> start(.*)"
@@ -84,5 +85,5 @@ if __name__ == "__main__":
         print "threads: ",threads
         for attr in attrs:
             if attr in summary.get_threads_attrs(threads):
-               mean, variance, stddev = meanstdv(summary.get_threads_attr_val(threads,attr))
-               print attr,": ",mean,",",variance,",",stddev
+               mean, variance, stddev, rsd = meanstdv(summary.get_threads_attr_val(threads,attr))
+               print attr,": ",mean,",",variance,",",stddev,",",rsd
