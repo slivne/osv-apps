@@ -18,6 +18,7 @@ OSV_VERSION=""
 TESTS=""
 SUT_OS=""
 NO_KILL=0
+EC2_KEYS=""
 
 PARAM_HELP_LONG="--help"
 PARAM_HELP="-h"
@@ -112,7 +113,7 @@ do
       shift 1
       ;;
     "$PARAM_EC2_KEY_NAME")
-      EC2_KEY_NAME=$2
+      EC2_KEYS=" --ec2-key $EC2_KEY_NAME"
       shift 2
       ;;    
     "$PARAM_HELP")
@@ -172,12 +173,7 @@ create_ami() {
   PLACEMENT_GROUP_PARAM="--placement-group $AWS_PLACEMENT_GROUP"
  fi
 
- local EC2_KEYS=""
- if test  x"$EC2_KEY_NAME" != x""; then
-	EC2_KEYS=" --ec2-key $EC2_KEY_NAME"
- fi
-
- echo "=== Create OSv instance ==="
+  echo "=== Create OSv instance ==="
  $SCRIPTS_ROOT/release-ec2.sh --private-ami-only \
                               --override-version $TEST_OSV_VER \
                               --region $AWS_REGION \
@@ -191,6 +187,7 @@ create_ami() {
 
 
 prepare_instance_for_test() {
+echo "prepare_instance_for_test"
  PLACEMENT_GROUP_PARAM=""
  if test x"$AWS_PLACEMENT_GROUP" != x""; then
   PLACEMENT_GROUP_PARAM="--placement-group $AWS_PLACEMENT_GROUP"
@@ -211,6 +208,7 @@ prepare_instance_for_test() {
                                                   --instance-type $INSTANCE_TYPE \
                                                   $PLACEMENT_GROUP_PARAM \
                                                   $EC2_USER_DATA_PARAM \
+												  $EC2_KEYS \
                                                   | tee /dev/tty | ec2_response_value INSTANCE INSTANCE`
 
  if test x"$TEST_INSTANCE_ID" = x""; then
