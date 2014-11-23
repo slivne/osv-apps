@@ -16,10 +16,10 @@
   
   "ec2_m3.xlarge" : {
       "tester" : {
-          "recordcount" : "500000",
+          "recordcount" : "800000",
           "ycsb" : {
              "run" : {
-                 "operationcount" : "100000"
+                 "operationcount" : "2000000"
              }
           }
        }
