@@ -21,5 +21,5 @@ cd memcached-1.4.??
 make
 make test
 make install
-nohup memcached -u root -t 1 -m 4048&
+nohup memcached -u root -t 1 -m 4096 &
 echo end >> /tmp/boot
