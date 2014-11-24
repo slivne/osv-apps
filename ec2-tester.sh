@@ -231,7 +231,8 @@ update_osv_instance_for_test() {
         wait_for_instance_shutdown $TEST_INSTANCE_ID
         start_instances $TEST_INSTANCE_ID
         wait_for_instance_startup $TEST_INSTANCE_ID 300 || handle_test_error
-        sleep 420
+        TEST_INSTANCE_IP=`get_instance_private_ip $TEST_INSTANCE_ID`
+        sleep 300
      fi
   fi
 }
