@@ -21,6 +21,7 @@ NO_KILL=0
 EC2_KEYS=""
 EC2_SUBNET=""
 EC2_SECURITY=""
+SLEEP_TIME=300
 
 PARAM_HELP_LONG="--help"
 PARAM_HELP="-h"
@@ -37,6 +38,7 @@ PARAM_NO_KILL="--no-kill"
 PARAM_EC2_KEY_NAME="--ec2-key"
 PARAM_EC2_SUBNET="--ec2-subnet"
 PARAM_EC2_SECURITY="--ec2-security"
+PARAM_SLEEP_TIME="--sleep"
 print_help() {
  cat <<HLPEND
 
@@ -67,7 +69,8 @@ This script receives following command line arguments:
     $PARAM_NO_KILL - do not kill the SUT instances
     $PARAM_EC2_KEY_NAME <ec2-keys> - use the provided EC2 SSH key names
     $PARAM_EC2_SUBNET <ec2-subnet> - start in a VPC according to its subnet id
-	$EC2_SECURITY <ec2-security> - specify a security group, must specify one when using VPC
+    $PARAM_EC2_SECURITY <ec2-security> - specify a security group, must specify one when using VPC
+    $PARAM_SLEEP_TIME <time in sec> - Speifiy the time in seconds to wait before attempting the testc
     <test directories> - list of test directories seperated by comma
 
 HLPEND
@@ -127,6 +130,10 @@ do
       ;;
     "$PARAM_EC2_SECURITY")
       EC2_SECURITY=" --security-group-ids $2"
+      shift 2
+      ;;
+      "$PARAM_SLEEP_TIME")
+      SLEEP_TIME="$2"
       shift 2
       ;;
     "$PARAM_HELP")
@@ -278,6 +285,7 @@ update_osv_instance_for_test() {
   fi
 }
 
+
 if test x"$OSV_VERSION" = x""; then
    OSV_VERSION=`$SCRIPTS_ROOT/osv-version.sh` 
 fi
@@ -299,7 +307,7 @@ do
   echo "=== create instance type $INSTANCE_TYPE for test $TEST ==="
   prepare_instance_for_test
 
-  sleep 300
+  sleep $SLEEP_TIME
 
   echo "=== Ping Host ==="
   ping -c 4 $TEST_INSTANCE_IP
