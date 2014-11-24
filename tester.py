@@ -88,6 +88,26 @@ def config_flatten(d, parent_key='', sep='.'):
             items.append((new_key, v))
     return dict(items)
 
+def get_file(conf_file, name):
+    if os.path.isabs(name) == False:
+        name = os.path.join(os.path.dirname(conf_file),name)
+    f = open(name)
+    res = f.read()
+    f.close()
+    return res
+
+def update_config_file(conf, file_name):
+    p = re.compile('/file:(.*)\s*')
+    if not isinstance(conf, dict):
+        return
+    for k,v in conf.items():
+        if isinstance(v, dict):
+            update_config_file(v, file_name)
+        elif isinstance(v, unicode):
+            m = p.match(v)
+            if m:
+                conf[k] = get_file(file_name, m.group(1))
+
 # TODO need to update the method config files are found - currently seraching up the path
 def config(dir,params,selector):
     # find config files
@@ -103,6 +123,7 @@ def config(dir,params,selector):
     # merge config files
     for fconfig in config_files:
        new_config = json.load(open(fconfig))
+       update_config_file(new_config, fconfig)
        default = {}
        if "tester" in new_config:
           default["tester"] = new_config["tester"]
@@ -247,14 +268,13 @@ def compile(args):
         configuration = config(dir,params,args.config_selection)
         template_prepare(configuration,dir)
 
-
 def config_get_command(args):
     params = extract_config_params_from_args(args)
     if args.directory and len(args.directory) > 0:
         configuration = config(args.directory[0],params,args.config_selection)
         if args.param in configuration:
-           print configuration[args.param]
-           return
+            print configuration[args.param]
+            return
     print ""   
 
 if __name__ == "__main__":
