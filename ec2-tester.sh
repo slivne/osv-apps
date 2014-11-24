@@ -226,7 +226,9 @@ update_osv_instance_for_test() {
   if test x"$TEST_CMDLINE" != x""; then
      OSV_CMDLINE=`curl http://$TEST_INSTANCE_IP:8000/os/cmdline`
      if test x"$OSV_CMDLINE" != x"$TEST_CMDLINE"; then
-        curl -X POST -d cmdline="$TEST_CMDLINE" http://$TEST_INSTANCE_IP:8000/os/cmdline 
+curl -X post -G -v http://$TEST_INSTANCE_IP:8000/os/cmdline --data-urlencode cmdline="$T"
+
+        curl -X POST -G http://$TEST_INSTANCE_IP:8000/os/cmdline --data-urlencode cmdline="$TEST_CMDLINE"
         stop_instance_forcibly $TEST_INSTANCE_ID
         wait_for_instance_shutdown $TEST_INSTANCE_ID
         start_instances $TEST_INSTANCE_ID
