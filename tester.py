@@ -209,9 +209,9 @@ def run_file(file):
     out_dir = os.path.join(os.path.dirname(file),"out") 
     save_cwd = os.getcwd()
     os.chdir(os.path.dirname(file))
-    os.mkdir(out)
+    os.mkdir(out_dir)
     file_name = os.path.basename(file) + ".stdout_stderr"
-    file_stdout = open(os.path.join(out_dir + file_name), "w")
+    file_stdout = open(os.path.join(out_dir, file_name), "w")
     file_return = subprocess.call(file, stdout=file_stdout, stderr=subprocess.STDOUT, shell=True)
     file_stdout.close()
     os.chdir(save_cwd)
