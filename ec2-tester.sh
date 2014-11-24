@@ -21,6 +21,7 @@ NO_KILL=0
 EC2_KEYS=""
 EC2_SUBNET=""
 EC2_SECURITY=""
+S3_BUCKET=""
 SLEEP_TIME=300
 
 PARAM_HELP_LONG="--help"
@@ -39,6 +40,7 @@ PARAM_EC2_KEY_NAME="--ec2-key"
 PARAM_EC2_SUBNET="--ec2-subnet"
 PARAM_EC2_SECURITY="--ec2-security"
 PARAM_SLEEP_TIME="--sleep"
+PARAM_S3_BUCKET="--bucket"
 print_help() {
  cat <<HLPEND
 
@@ -71,6 +73,7 @@ This script receives following command line arguments:
     $PARAM_EC2_SUBNET <ec2-subnet> - start in a VPC according to its subnet id
     $PARAM_EC2_SECURITY <ec2-security> - specify a security group, must specify one when using VPC
     $PARAM_SLEEP_TIME <time in sec> - Speifiy the time in seconds to wait before attempting the testc
+    $PARAM_S3_BUCKET <s3 bucket> - Specific an S3 bucket name to use to upload the results
     <test directories> - list of test directories seperated by comma
 
 HLPEND
@@ -134,6 +137,10 @@ do
       ;;
       "$PARAM_SLEEP_TIME")
       SLEEP_TIME="$2"
+      shift 2
+      ;;
+      "$PARAM_S3_BUCKET")
+      S3_BUCKET="$2"
       shift 2
       ;;
     "$PARAM_HELP")
@@ -323,6 +330,9 @@ do
      selector="ec2_$INSTANCE_TYPE"
      echo "$SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST"
      $SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST
+     if test x"$S3_BUCKET" 1= ""; then
+       echo "uploading directory $TEST to bucket $S3_BUCKET"
+     fi
      FAILE=$?
   fi
   ec2-get-console-output $TEST_INSTANCE_ID
