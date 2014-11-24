@@ -9,7 +9,7 @@
 
 SRC_ROOT=`pwd`
 AWS_REGION=us-east-1
-AWS_ZONE=us-east-1c
+AWS_ZONE=us-east-1d
 AWS_PLACEMENT_GROUP=""
 INSTANCE_TYPE=m3.xlarge
 IMAGE_NAME=$SRC_ROOT/build/release.x64/usr.img
@@ -17,6 +17,10 @@ AMI_ID=""
 OSV_VERSION=""
 TESTS=""
 SUT_OS=""
+NO_KILL=0
+EC2_KEYS=""
+EC2_SUBNET=""
+EC2_SECURITY=""
 
 PARAM_HELP_LONG="--help"
 PARAM_HELP="-h"
@@ -29,7 +33,10 @@ PARAM_AMI="--ami"
 PARAM_INSTANCE_TYPE="--instance-type"
 PARAM_OSV_VERSION="--osv-version"
 PARAM_SUT_OS="--sut-os"
-
+PARAM_NO_KILL="--no-kill"
+PARAM_EC2_KEY_NAME="--ec2-key"
+PARAM_EC2_SUBNET="--ec2-subnet"
+PARAM_EC2_SECURITY="--ec2-security"
 print_help() {
  cat <<HLPEND
 
@@ -56,7 +63,11 @@ This script receives following command line arguments:
     $PARAM_AMI <image file> - use specified ami
     $PARAM_INSTANCE_TYPE <ec2 instance type> - instance type to launch
     $PARAM_OSV_VERSION <osv-version> - osv version as string
-    $PARAM_SUT_OS <os> - system uder os type
+    $PARAM_SUT_OS <os> - system under test os type
+    $PARAM_NO_KILL - do not kill the SUT instances
+    $PARAM_EC2_KEY_NAME <ec2-keys> - use the provided EC2 SSH key names
+    $PARAM_EC2_SUBNET <ec2-subnet> - start in a VPC according to its subnet id
+	$EC2_SECURITY <ec2-security> - specify a security group, must specify one when using VPC
     <test directories> - list of test directories seperated by comma
 
 HLPEND
@@ -101,6 +112,23 @@ do
       SUT_OS=$2
       shift 2
       ;;
+    "$PARAM_NO_KILL")
+      NO_KILL=1
+	echo "instance will not be terminated, make sure to terminate it after the test"
+      shift 1
+      ;;
+    "$PARAM_EC2_KEY_NAME")
+      EC2_KEYS=" -k $2"
+      shift 2
+      ;;
+    "$PARAM_EC2_SUBNET")
+      EC2_SUBNET=" --subnet-id $2"
+      shift 2
+      ;;
+    "$PARAM_EC2_SECURITY")
+      EC2_SECURITY=" --security-group-ids $2"
+      shift 2
+      ;;
     "$PARAM_HELP")
       print_help
       exit 0
@@ -133,9 +161,16 @@ SCRIPTS_ROOT="$SRC_ROOT/scripts"
 
 post_test_cleanup() {
  if test x"$TEST_INSTANCE_ID" != x""; then
-    delete_instance $TEST_INSTANCE_ID
-    wait_for_instance_delete $TEST_INSTANCE_ID
-    TEST_INSTANCE_ID=""
+	if test $NO_KILL = 1; then
+		echo "stop_instance_forcibly " $TEST_INSTANCE_ID > clean_test.sh
+		echo "wait_for_instance_shutdown " $TEST_INSTANCE_ID >> clean_test.sh
+		echo "delete_instance " $TEST_INSTANCE_ID >> clean_test.sh
+	else
+#    	stop_instance_forcibly $TEST_INSTANCE_ID
+		wait_for_instance_shutdown $TEST_INSTANCE_ID
+		delete_instance $TEST_INSTANCE_ID
+	fi
+	TEST_INSTANCE_ID=""
  fi
 }
 
@@ -157,6 +192,9 @@ create_ami() {
                               --region $AWS_REGION \
                               --zone $AWS_ZONE \
                               --override-image $IMAGE_NAME \
+                            $EC2_KEYS \
+                            $EC2_SUBNET \
+                            $EC2_SECURITY \
                               $PLACEMENT_GROUP_PARAM || handle_test_error
  AMI_ID=`get_ami_id_by_name OSv-$TEST_OSV_VER`
  echo "AMI created $AMI_ID"
@@ -184,6 +222,9 @@ prepare_instance_for_test() {
                                                   --instance-type $INSTANCE_TYPE \
                                                   $PLACEMENT_GROUP_PARAM \
                                                   $EC2_USER_DATA_PARAM \
+                                                  $EC2_KEYS \
+                                                  $EC2_SUBNET \
+                                                  $EC2_SECURITY \
                                                   | tee /dev/tty | ec2_response_value INSTANCE INSTANCE`
 
  if test x"$TEST_INSTANCE_ID" = x""; then
