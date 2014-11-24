@@ -3,7 +3,9 @@
      "memaslap" : {
         "threads" : "3",
         "concurrency" : "120",
-        "duration" : "60s"
+        "duration" : "60s",
+        "retry" : "3",
+        "test_delimiter" : ">>>>>>> end <<<<<<<"
      }
   }
 }
