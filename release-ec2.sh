@@ -19,10 +19,16 @@ PARAM_MODULES="--modules-list"
 PARAM_REGION="--region"
 PARAM_ZONE="--zone"
 PARAM_PLACEMENT_GROUP="--placement-group"
-PARAM_EC2_KEY_NAME="-k"
 PARAM_IMAGE_SIZE="--image-size"
+PARAM_EC2_KEY_NAME="-k"
+PARAM_EC2_SUBNET="--ec2-subnet"
+PARAM_EC2_SECURITY="--ec2-security"
 
 MODULES_LIST=default
+
+EC2_SUBNET=""
+EC2_SECURITY=""
+EC2_KEYS_NAME=""
 
 print_help() {
  cat <<HLPEND
@@ -64,8 +70,10 @@ This script receives following command line arguments:
     $PARAM_REGION <region> - AWS region to work in
     $PARAM_ZONE <availability zone> - AWS availability zone to work in
     $PARAM_PLACEMENT_GROUP <placement group> - Placement group for instances created by this script
-    $PARAM_EC2_KEY_NAME <ec2-key-name> - The EC2 key name, as it appears in the EC2 console
     $PARAM_IMAGE_SIZE <image size> - size of image to build (unit is MB)
+    $PARAM_EC2_KEY_NAME <ec2-key-name> - The EC2 key name, as it appears in the EC2 console
+    $PARAM_EC2_SUBNET <ec2-subnet> - start in a VPC according to its subnet id
+    $PARAM_EC2_SECURITY <ec2-security> - specify a security group, must specify one when using VPC
 
 HLPEND
 }
@@ -115,15 +123,23 @@ do
       OSV_PLACEMENT_GROUP=$2
       shift 2
       ;;
-    "$PARAM_EC2_KEY_NAME")
-      EC2_KEY_NAME=$2
-      shift 2
-      ;;
     "$PARAM_IMAGE_SIZE")
       if [ $2 -ne "" ]
       then
         IMAGE_SIZE="fs_size_mb=$2"
       fi
+      shift 2
+      ;;
+    "$PARAM_EC2_KEY_NAME")
+      EC2_KEYS_NAME="-k $2"
+      shift 2
+      ;;
+    "$PARAM_EC2_SUBNET")
+      EC2_SUBNET=" --subnet-id $2"
+      shift 2
+      ;;
+    "$PARAM_EC2_SECURITY")
+      EC2_SECURITY=" --security-group-ids $2"
       shift 2
       ;;
     "$PARAM_HELP")
@@ -197,13 +213,10 @@ launch_template_instance() {
 
  local TEMPLATE_AMI_ID=$1
  local TEMPLATE_INSTANCE_TYPE=$2
- local EC2_KEYS=""
-if test  x"$EC2_KEY_NAME" != x""; then
-	EC2_KEYS=" -k $EC2_KEY_NAME"
-fi
 
-ec2-run-instances $TEMPLATE_AMI_ID $EC2_KEYS --availability-zone `get_availability_zone` \
+ ec2-run-instances $TEMPLATE_AMI_ID --availability-zone `get_availability_zone` \
                                                   --instance-type $TEMPLATE_INSTANCE_TYPE \
+                                                  $EC2_KEYS_NAME $EC2_SUBNET $EC2_SECURITY \
                                                   $PLACEMENT \
                                                   | tee /dev/tty | ec2_response_value INSTANCE INSTANCE
 }
