@@ -128,11 +128,11 @@ do
       shift 2
       ;;
     "$PARAM_EC2_SUBNET")
-      EC2_SUBNET=" --subnet $2"
+      EC2_SUBNET=" --s $2"
       shift 2
       ;;
     "$PARAM_EC2_SECURITY")
-      EC2_SECURITY=" --group $2"
+      EC2_SECURITY=" --g $2"
       shift 2
       ;;
       "$PARAM_SLEEP_TIME")
