@@ -1,14 +1,17 @@
 {
   "tester" : {
       "ycsb" : {
+          "fieldcount" : "20",
           "recordcount" : "100000",
+          "requestdistribution" : "latest",
           "load" : {
               "operationcount" : "100000",
               "threads" : "100"
           },
           "run" : {
               "iterations" : "4",
-              "operationcount" : "10000",
+              "maxoperationcount" : "10000",
+              "maxexecutiontimeinseconds" : "600",
               "threads" : "64 128 200 400"
           }
       }
@@ -16,10 +19,11 @@
   
   "ec2_m3.xlarge" : {
       "tester" : {
-          "recordcount" : "500000",
+          "timeout" : "14400",
           "ycsb" : {
+             "recordcount" : "1500000",
              "run" : {
-                 "operationcount" : "100000"
+                 "maxoperationcount" : "4000000"
              }
           }
        }
@@ -27,8 +31,8 @@
  
   "huginn-muninn" : {
       "tester" : {
-          "recordcount" : "800000",
           "ycsb" : {
+             "recordcount" : "800000",
              "run" : {
                  "operationcount" : "8000000"
              }

@@ -19,6 +19,7 @@
   
   "ec2_m3.xlarge" : {
       "tester" : {
+          "timeout" : "14400",
           "ycsb" : {
              "recordcount" : "1500000",
              "run" : {
