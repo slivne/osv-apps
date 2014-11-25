@@ -12,6 +12,7 @@ else
   BUCKET=$3$4
 fi
 FILE=$1"."`date +"%y-%m-%d_%H-%M-%S"`.zip
-zip -r $FILE $2
+cd $2
+zip -r $FILE *
 s3cmd put $FILE $BUCKET
 rm $FILE 
