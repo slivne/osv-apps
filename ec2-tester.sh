@@ -176,8 +176,8 @@ SCRIPTS_ROOT="$SRC_ROOT/scripts"
 post_test_cleanup() {
  if test x"$TEST_INSTANCE_ID" != x""; then
 	if test $NO_KILL = 1; then
-		echo "stop_instance_forcibly " $TEST_INSTANCE_ID > clean_test.sh
-		echo "wait_for_instance_shutdown " $TEST_INSTANCE_ID >> clean_test.sh
+    echo ". $SCRIPTS_ROOT/ec2-utils.sh" > clean_test.sh
+    echo "wait_for_instance_shutdown " $TEST_INSTANCE_ID >> clean_test.sh
 		echo "delete_instance " $TEST_INSTANCE_ID >> clean_test.sh
 	else
 #    	stop_instance_forcibly $TEST_INSTANCE_ID
@@ -330,8 +330,8 @@ do
      selector="ec2_$INSTANCE_TYPE"
      echo "$SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST"
      $SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST
-     if test x"$S3_BUCKET" 1= ""; then
-       echo "uploading directory $TEST to bucket $S3_BUCKET"
+     if test x"$S3_BUCKET" != ""; then
+       $SCRIPTS_ROOT/upload_results.sh $INSTANCE_TYPE $TEST $S3_BUCKET
      fi
      FAILE=$?
   fi
