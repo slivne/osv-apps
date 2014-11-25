@@ -1,7 +1,7 @@
 {
   "tester" : {
       "ycsb" : {
-          "fieldcount" : "20",
+          "fieldcount" : "2",
           "recordcount" : "100000",
           "requestdistribution" : "latest",
           "load" : {
