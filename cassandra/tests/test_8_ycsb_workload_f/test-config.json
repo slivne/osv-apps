@@ -8,6 +8,12 @@
               "operationcount" : "100000",
               "threads" : "100"
           },
+          "warmup" : {
+              "iterations" : "1",
+              "maxoperationcount" : "10000",
+              "maxexecutiontimeinseconds" : "600",
+              "threads" : "64 128 200 400"
+          },
           "run" : {
               "iterations" : "4",
               "maxoperationcount" : "10000",
@@ -22,6 +28,9 @@
           "timeout" : "14400",
           "ycsb" : {
              "recordcount" : "1500000",
+             "warmup" : {
+                 "maxoperationcount" : "2000000"
+             },
              "run" : {
                  "maxoperationcount" : "4000000"
              }
