@@ -79,7 +79,7 @@ def read(filename):
         return ycsb_output(file.read())
 
 if __name__ == "__main__":
-    attrs = ['overall_throughput_ops_sec','read_operations','update_operations','write_operations','delete_operations','read_average_latency_us','update_average_latency_us','write_average_latency_us','delete__average_latency_us','read_min_latency_us','update_min_latency_us','write_min_latency_us','delete_min_latency_us','read_max_latency_us','update_max_latency_us','write_max_latency_us','delete_max_latency_us','read_95th_percentile_latency_ms','update_95th_percentile_latency_ms','write_95th_percentile_latency_ms','delete_95th_percentile_latency_ms','read_99th_percentile_latency_ms','update_99th_percentile_latency_ms','write_99th_percentile_latency_ms','delete_99th_percentile_latency_ms']
+    attrs = ['overall_throughput_ops_sec','read_operations','update_operations','write_operations','delete_operations','scan_operations','read_average_latency_us','update_average_latency_us','write_average_latency_us','delete_average_latency_us','scan_average_latency_us','read_min_latency_us','update_min_latency_us','write_min_latency_us','delete_min_latency_us','scan_min_latency_us','read_max_latency_us','update_max_latency_us','write_max_latency_us','delete_max_latency_us','scan_max_latency_us','read_95th_percentile_latency_ms','update_95th_percentile_latency_ms','write_95th_percentile_latency_ms','delete_95th_percentile_latency_ms','scan_95th_percentile_latency_ms','read_99th_percentile_latency_ms','update_99th_percentile_latency_ms','write_99th_percentile_latency_ms','delete_99th_percentile_latency_ms','scan_99th_percentile_latency_ms']
     summary = read(sys.argv[1])
     for threads in summary.get_threads():
         print "threads: ",threads
