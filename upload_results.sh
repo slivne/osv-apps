@@ -6,13 +6,13 @@ if [ $# -lt 3 ]; then
     exit -1
 fi
 
-if [ $# lt 4]; then
-  BUCKET=$3
+if [ $# -lt 4 ]; then
+  BUCKET="$3/"
 else
-  BUCKET=$3$4
+  BUCKET="$3$4/"
 fi
-FILE=$1"."`date +"%y-%m-%d_%H-%M-%S"`.zip
-cd $2
-zip -r $FILE *
-s3cmd put $FILE $BUCKET
-rm $FILE 
+FILE="$1."$(date +"%y-%m-%d_%H-%M-%S").zip
+cd "$2"
+zip -r "$FILE" ./*
+s3cmd put "$FILE" "$BUCKET$FILE"
+rm "$FILE"
