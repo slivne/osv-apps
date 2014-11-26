@@ -116,6 +116,9 @@ parser.add_argument("-t", "--test", action="store_true",
 cmdargs = parser.parse_args()
 
 (name, version, id) = platform.linux_distribution()
+if name == "Amazon Linux AMI":
+    name = "Fedora"
+    version = '21'
 
 for distro in distros:
     if distro.name == name:
