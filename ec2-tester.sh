@@ -372,7 +372,7 @@ do
      fi
      FAILE=$?
   fi
-  ec2-get-console-output $TEST_INSTANCE_ID
+  ec2-get-console-output $TEST_INSTANCE_ID > "$TEST/out/console.txt"
 
   echo "=== cleaning up for test $TEST ==="
   post_test_cleanup
