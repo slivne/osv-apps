@@ -322,7 +322,7 @@ TEST_INSTANCE_NAME=OSv-`get_ami_name_by_id $AMI_ID`-ec2-tester-`timestamp`
 
 
 ANY_TEST_FAILED=0
-for TEST in "$TESTS";
+for TEST in ${TESTS};
 do
   FAIL=0
   echo "=== create instance type $INSTANCE_TYPE for test $TEST ==="
