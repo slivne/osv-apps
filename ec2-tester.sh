@@ -22,6 +22,8 @@ EC2_KEYS=""
 EC2_SUBNET=""
 EC2_SECURITY=""
 S3_BUCKET=""
+AWS_CREDENTIAL=""
+TEST_NAME=""
 SLEEP_TIME=300
 
 PARAM_HELP_LONG="--help"
@@ -41,6 +43,8 @@ PARAM_EC2_SUBNET="--ec2-subnet"
 PARAM_EC2_SECURITY="--ec2-security"
 PARAM_SLEEP_TIME="--sleep"
 PARAM_S3_BUCKET="--bucket"
+PARAM_SET_AWS="--aws"
+PARAM_TEST_NAME="--test-name"
 print_help() {
  cat <<HLPEND
 
@@ -73,7 +77,9 @@ This script receives following command line arguments:
     $PARAM_EC2_SUBNET <ec2-subnet> - start in a VPC according to its subnet id
     $PARAM_EC2_SECURITY <ec2-security> - specify a security group, must specify one when using VPC
     $PARAM_SLEEP_TIME <time in sec> - Speifiy the time in seconds to wait before attempting the testc
+    $PARAM_TEST_NAME <name> - test name that would be set in the created machine
     $PARAM_S3_BUCKET <s3 bucket> - Specific an S3 bucket name to use to upload the results
+    $PARAM_SET_AWS - set the AWS keys and secret according to the environment variable
     <test directories> - list of test directories seperated by comma
 
 HLPEND
@@ -142,6 +148,14 @@ do
       "$PARAM_S3_BUCKET")
       S3_BUCKET="$2"
       shift 2
+      ;;
+      "$PARAM_TEST_NAME")
+      TEST_NAME="--config_param test_name:$2"
+      shift 2
+      ;;
+      "$PARAM_SET_AWS")
+      AWS_CREDENTIAL="--config_param aws_keys:$AWS_ACCESS_KEY --config_param aws_secret:AWS_SECRET_KEY"      
+      shift
       ;;
     "$PARAM_HELP")
       print_help
@@ -224,10 +238,10 @@ prepare_instance_for_test() {
  EC2_USER_DATA_PARAM=""
  if test x"$SUT_OS" != x""; then
     selector="ec2_$INSTANCE_TYPE"
-    EC2_USER_DATA="`$SCRIPTS_ROOT/tester.py config-get sut.os.linux.ec2_user_data --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TESTS`"
+    EC2_USER_DATA="`$SCRIPTS_ROOT/tester.py config-get sut.os.linux.ec2_user_data $AWS_CREDENTIAL $TEST_NAME --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TESTS`"
     EC2_USER_DATA_FILE="/tmp/ec2_user_data.$$"
     if test x"$EC2_USER_DATA" != x""; then
-       $SCRIPTS_ROOT/tester.py config-get sut.os.$SUT_OS.ec2_user_data --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TESTS > $EC2_USER_DATA_FILE
+       $SCRIPTS_ROOT/tester.py config-get sut.os.$SUT_OS.ec2_user_data --config_param sut.ip:$TEST_INSTANCE_IP $AWS_CREDENTIAL $TEST_NAME --config_param tester.ip:127.0.0.1 --config_selection $selector $TESTS > $EC2_USER_DATA_FILE
        EC2_USER_DATA_PARAM="--user-data-file $EC2_USER_DATA_FILE"
     fi
  fi
@@ -266,7 +280,7 @@ prepare_instance_for_test() {
 prepare_image_for_test() {
   echo "=== Update image according to tests ==="
   selector="ec2_$INSTANCE_TYPE"
-  OSV_CMDLINE="`$SCRIPTS_ROOT/tester.py config-get sut.os.osv.cmdline --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TESTS`"
+  OSV_CMDLINE="`$SCRIPTS_ROOT/tester.py config-get sut.os.osv.cmdline --config_param sut.ip:$TEST_INSTANCE_IP $AWS_CREDENTIAL $TEST_NAME --config_param tester.ip:127.0.0.1 --config_selection $selector $TESTS`"
   # TODO assuming all tests cmdlines are the same / all instance types are the same
   if test x"$OSV_CMDLINE" != x""; then
      echo "$SCRIPTS_ROOT/imgedit.py setargs $IMAGE_NAME $OSV_CMDLINE"
@@ -277,7 +291,7 @@ prepare_image_for_test() {
 update_osv_instance_for_test() {
   echo "=== Update instance $TEST_INSTANCE_ID according to test $TEST ==="
   selector="ec2_$INSTANCE_TYPE"
-  TEST_CMDLINE="`$SCRIPTS_ROOT/tester.py config-get sut.os.osv.cmdline --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST`"
+  TEST_CMDLINE="`$SCRIPTS_ROOT/tester.py config-get sut.os.osv.cmdline --config_param sut.ip:$TEST_INSTANCE_IP $AWS_CREDENTIAL $TEST_NAME --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST`"
   if test x"$TEST_CMDLINE" != x""; then
      OSV_CMDLINE=`curl http://$TEST_INSTANCE_IP:8000/os/cmdline`
      if test x"$OSV_CMDLINE" != x"$TEST_CMDLINE"; then
@@ -331,7 +345,7 @@ do
      echo "$SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST"
      $SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST
      if test x"$S3_BUCKET" != x""; then
-       $SCRIPTS_ROOT/upload_results.sh $INSTANCE_TYPE $TEST $S3_BUCKET
+       $SCRIPTS_ROOT/upload_results.sh $INSTANCE_TYPE "$TEST/out" $S3_BUCKET
      fi
      FAILE=$?
   fi
