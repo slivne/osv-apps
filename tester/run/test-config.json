@@ -1,0 +1,16 @@
+{
+  "tester" : {
+     "ip" : "$$tester.ip",
+     "aws_keys": "$$aws_keys",
+     "aws_secret": "$$aws_secret",
+     "test_name": "$$test_name"
+  },
+  "sut" : {
+     "ip" : "$$sut.ip",
+     "os" : {
+          "linux" : {
+               "ec2_user_data": "/file:linux_setup.sh"               
+          }
+      }
+  }
+}
