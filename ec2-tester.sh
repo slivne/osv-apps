@@ -1,4 +1,4 @@
-#!/bin/sh 
+#!/bin/bash
 #
 #  Copyright (C) 2013 Cloudius Systems, Ltd.
 #
@@ -26,7 +26,10 @@ AWS_CREDENTIAL=""
 TEST_NAME=""
 SLEEP_TIME=300
 EPHEMERAL=""
+AMI_NAME=""
+
 USE_SSD=("c3.xlarge")
+declare -A image_names=( ["amazon"]="ami-b66ed3de" ["rhel"]="ami-a8d369c0")
 
 PARAM_HELP_LONG="--help"
 PARAM_HELP="-h"
@@ -36,6 +39,7 @@ PARAM_ZONE="--zone"
 PARAM_PLACEMENT_GROUP="--placement-group"
 PARAM_IMAGE="--override-image"
 PARAM_AMI="--ami"
+PARAM_AMI_NAME="--ami-name"
 PARAM_INSTANCE_TYPE="--instance-type"
 PARAM_OSV_VERSION="--osv-version"
 PARAM_SUT_OS="--sut-os"
@@ -64,7 +68,7 @@ This script requires following Amazon credentials to be provided via environment
     for more details
 
 This script receives following command line arguments:
-   
+
     $PARAM_HELP - print this help screen and exit
     $PARAM_SRC - osv src root
     $PARAM_REGION <region> - AWS region to work in
@@ -72,6 +76,7 @@ This script receives following command line arguments:
     $PARAM_PLACEMENT_GROUP <placement group> - Placement group for instances created by this script
     $PARAM_IMAGE <image file> - do not rebuild OSv, upload specified image instead
     $PARAM_AMI <image file> - use specified ami
+    $PARAM_AMI_NAME <image id> - instead of ami use amazon/rhel
     $PARAM_INSTANCE_TYPE <ec2 instance type> - instance type to launch
     $PARAM_OSV_VERSION <osv-version> - osv version as string
     $PARAM_SUT_OS <os> - system under test os type
@@ -103,6 +108,11 @@ do
       AMI_ID=$2
       shift 2
       ;;
+    "$PARAM_AMI_NAME")
+      AMI_NAME=$2
+      shift 2
+      ;;
+
     "$PARAM_INSTANCE_TYPE")
       INSTANCE_TYPE=$2
       shift 2
@@ -157,7 +167,7 @@ do
       shift 2
       ;;
       "$PARAM_SET_AWS")
-      AWS_CREDENTIAL="--config_param aws_keys:$AWS_ACCESS_KEY --config_param aws_secret:AWS_SECRET_KEY"      
+      AWS_CREDENTIAL="--config_param aws_keys:$AWS_ACCESS_KEY --config_param aws_secret:AWS_SECRET_KEY"
       shift
       ;;
     "$PARAM_HELP")
@@ -192,16 +202,22 @@ SCRIPTS_ROOT="$SRC_ROOT/scripts"
 
 case "${USE_SSD[@]}" in  *"$INSTANCE_TYPE"*) EPHEMERAL="-b /dev/sdc=ephemeral0" ;; esac
 
+if [ $AMI_NAME == "" ]; then
+  AMI_NAME="$AMI_ID"
+else
+  AMI_ID= "${image_names["$AMI_NAME"]}"
+fi
+
 post_test_cleanup() {
  if test x"$TEST_INSTANCE_ID" != x""; then
 	if test $NO_KILL = 1; then
     echo ". $SCRIPTS_ROOT/ec2-utils.sh" > clean_test.sh
+    echo "delete_instance " $TEST_INSTANCE_ID >> clean_test.sh
     echo "wait_for_instance_shutdown " $TEST_INSTANCE_ID >> clean_test.sh
-		echo "delete_instance " $TEST_INSTANCE_ID >> clean_test.sh
 	else
 #    	stop_instance_forcibly $TEST_INSTANCE_ID
-		wait_for_instance_shutdown $TEST_INSTANCE_ID
 		delete_instance $TEST_INSTANCE_ID
+    wait_for_instance_shutdown $TEST_INSTANCE_ID
 	fi
 	TEST_INSTANCE_ID=""
  fi
@@ -231,7 +247,7 @@ create_ami() {
                             $EPHEMERAL \
                               $PLACEMENT_GROUP_PARAM || handle_test_error
  AMI_ID=`get_ami_id_by_name OSv-$TEST_OSV_VER`
- echo "AMI created $AMI_ID"
+ echo "AMI created $AMI_ID ($AMI_NAME)"
 }
 
 
@@ -315,7 +331,7 @@ update_osv_instance_for_test() {
 
 
 if test x"$OSV_VERSION" = x""; then
-   OSV_VERSION=`$SCRIPTS_ROOT/osv-version.sh` 
+   OSV_VERSION=`$SCRIPTS_ROOT/osv-version.sh`
 fi
 TEST_OSV_VER=$OSV_VERSION-ec2-tester-`timestamp`
 TEST_INSTANCE_NAME=OSv-$TEST_OSV_VER
@@ -345,19 +361,19 @@ do
      if test x"$SUT_OS" == xosv; then
         update_osv_instance_for_test
      fi
-     
+
      echo "=== Run tester ==="
      # TODO FIX LOCAL IP
      selector="ec2_$INSTANCE_TYPE"
      echo "$SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST"
      $SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST
      if test x"$S3_BUCKET" != x""; then
-       $SCRIPTS_ROOT/upload_results.sh $INSTANCE_TYPE "$TEST/out" "$S3_BUCKET/$AMI_ID"
+       $SCRIPTS_ROOT/upload_results.sh $INSTANCE_TYPE "$TEST/out" "$S3_BUCKET/$AMI_NAME"
      fi
      FAILE=$?
   fi
   ec2-get-console-output $TEST_INSTANCE_ID
-   
+
   echo "=== cleaning up for test $TEST ==="
   post_test_cleanup
 
