@@ -5,6 +5,7 @@ PARAM_HELP_LONG="--help"
 PARAM_ALL_FILES="--all"
 
 ALL_FILES=0
+ROOT_SRC=$(pwd)
 
 if test x"$TEST_BUCKET" = x""; then
   TEST_BUCKET=""
@@ -64,7 +65,10 @@ handle_file() {
 	        s3cmd get "$NAME"
 	        unzip ./*.zip
 	        rm "$OUT_DIR".zip
-	        cd ..
+	        for f in *.stdout_stderr; do
+	           $ROOT_SRC/memaslap2json.py --delimiter '>>>>>>> end <<<<<<<' $f | $ROOT_SRC/statjson.py > "$f.json"
+	        done
+	        cd -
         fi
      fi 
 }
