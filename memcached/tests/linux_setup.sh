@@ -24,6 +24,7 @@ make
 make test
 make install
 echo "Starting memcached " `uptime` >> /tmp/boot
+PATH="$PATH:/usr/local/bin"
 nohup memcached -u root -t 1 -m 4096 &
 echo end >> /tmp/boot
 echo `uptime` >> /tmp/boot
