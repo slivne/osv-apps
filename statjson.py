@@ -13,7 +13,7 @@ sq_values = {}
 count_values = {}
 total = 0
 def inc_arr(arr, k, v):
-    
+
     if k in arr:
         arr[k] = arr[k] + v
     else:
@@ -33,7 +33,10 @@ def add_values(obj):
 
 def create_values():
     res = {}
+    max = 0
     for k,v in count_values.items():
+        if v > max:
+            max = v
         if k in sum_values and v > 0:
             vf = float(v)
             res[k] = float(sum_values[k])/vf
@@ -46,7 +49,7 @@ def create_values():
                 res[k + "_rsd"] = res[k + "_std"] /  res[k]
             else:
                 res[k + "_rsd"] = 0
-
+    res["total"] = max
     print json.dumps(res, sort_keys=True, indent=4, separators=(',', ': '))
 
 def print_values():
@@ -67,11 +70,11 @@ def json_from_file(name):
         t, value, tb = sys.exc_info()
         traceback.print_tb(tb)
         print("Bad formatted JSON file '" + name + "' error ", value.message)
-        sys.exit(-1)    
+        sys.exit(-1)
 
 def parse_file(data):
     try:
-        
+
         if isinstance(data, dict):
             add_values(data)
         else:
@@ -88,7 +91,7 @@ def run_stat(files):
         parse_file(json.load(sys.stdin))
     else:
         for f in files:
-            parse_file(json_from_file(f)) 
+            parse_file(json_from_file(f))
 #    print_values()
     create_values()
 
@@ -109,8 +112,8 @@ def xpath(obj, path, pos):
                             print ("Path not found")
                             sys.exit(-1)
                     print('')
-            else:  
-                if path[pos] in obj:                
+            else:
+                if path[pos] in obj:
                     xpath(obj[path[pos]], path, pos +1)
                 else:
                     print ("Path not found")
@@ -129,10 +132,10 @@ def xpath(obj, path, pos):
                 sys.exit(-1)
         else:
             print json.dumps(obj, indent=4)
-        
+
     else:
         print obj
-    
+
 def xpath_search(files, path):
     paths = path.split("/")
     if len(files) == 0:
