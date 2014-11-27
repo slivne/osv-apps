@@ -25,6 +25,8 @@ S3_BUCKET=""
 AWS_CREDENTIAL=""
 TEST_NAME=""
 SLEEP_TIME=300
+EPHEMERAL=""
+USE_SSD=("c3.xlarge")
 
 PARAM_HELP_LONG="--help"
 PARAM_HELP="-h"
@@ -45,6 +47,7 @@ PARAM_SLEEP_TIME="--sleep"
 PARAM_S3_BUCKET="--bucket"
 PARAM_SET_AWS="--aws"
 PARAM_TEST_NAME="--test-name"
+
 print_help() {
  cat <<HLPEND
 
@@ -187,6 +190,8 @@ SCRIPTS_ROOT="$SRC_ROOT/scripts"
 
 . $SCRIPTS_ROOT/ec2-utils.sh
 
+case "${USE_SSD[@]}" in  *"$INSTANCE_TYPE"*) EPHEMERAL="-b /dev/sdc=ephemeral0" ;; esac
+
 post_test_cleanup() {
  if test x"$TEST_INSTANCE_ID" != x""; then
 	if test $NO_KILL = 1; then
@@ -223,6 +228,7 @@ create_ami() {
                             $EC2_KEYS \
                             $EC2_SUBNET \
                             $EC2_SECURITY \
+                            $EPHEMERAL \
                               $PLACEMENT_GROUP_PARAM || handle_test_error
  AMI_ID=`get_ami_id_by_name OSv-$TEST_OSV_VER`
  echo "AMI created $AMI_ID"
@@ -253,6 +259,7 @@ prepare_instance_for_test() {
                                                   $EC2_KEYS \
                                                   $EC2_SUBNET \
                                                   $EC2_SECURITY \
+                                                  $EPHEMERAL \
                                                   | tee /dev/tty | ec2_response_value INSTANCE INSTANCE`
 
  if test x"$TEST_INSTANCE_ID" = x""; then
@@ -345,7 +352,7 @@ do
      echo "$SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST"
      $SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST
      if test x"$S3_BUCKET" != x""; then
-       $SCRIPTS_ROOT/upload_results.sh $INSTANCE_TYPE "$TEST/out" $S3_BUCKET
+       $SCRIPTS_ROOT/upload_results.sh $INSTANCE_TYPE "$TEST/out" "$S3_BUCKET/$AMI_ID"
      fi
      FAILE=$?
   fi
