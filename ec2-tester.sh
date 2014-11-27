@@ -205,7 +205,7 @@ case "${USE_SSD[@]}" in  *"$INSTANCE_TYPE"*) EPHEMERAL="-b /dev/sdc=ephemeral0" 
 if [ $AMI_NAME == "" ]; then
   AMI_NAME="$AMI_ID"
 else
-  AMI_ID= "${image_names["$AMI_NAME"]}"
+  AMI_ID="${image_names[$AMI_NAME]}"
 fi
 
 post_test_cleanup() {
