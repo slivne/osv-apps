@@ -26,7 +26,7 @@ AWS_CREDENTIAL=""
 TEST_NAME=""
 SLEEP_TIME=300
 EPHEMERAL=""
-AMI_NAME=""
+AMI_FRIENDLY_NAME=""
 
 USE_SSD=("c3.xlarge")
 declare -A image_names=( ["amazon"]="ami-b66ed3de" ["rhel"]="ami-a8d369c0")
@@ -109,7 +109,7 @@ do
       shift 2
       ;;
     "$PARAM_AMI_NAME")
-      AMI_NAME=$2
+      AMI_FRIENDLY_NAME=$2
       shift 2
       ;;
 
@@ -202,10 +202,10 @@ SCRIPTS_ROOT="$SRC_ROOT/scripts"
 
 case "${USE_SSD[@]}" in  *"$INSTANCE_TYPE"*) EPHEMERAL="-b /dev/sdc=ephemeral0" ;; esac
 
-if [ $AMI_NAME == "" ]; then
-  AMI_NAME="$AMI_ID"
+if [ $AMI_FRIENDLY_NAME == "" ]; then
+  AMI_FRIENDLY_NAME="$AMI_ID"
 else
-  AMI_ID="${image_names[$AMI_NAME]}"
+  AMI_ID="${image_names[$AMI_FRIENDLY_NAME]}"
 fi
 
 post_test_cleanup() {
@@ -247,7 +247,7 @@ create_ami() {
                             $EPHEMERAL \
                               $PLACEMENT_GROUP_PARAM || handle_test_error
  AMI_ID=`get_ami_id_by_name OSv-$TEST_OSV_VER`
- echo "AMI created $AMI_ID ($AMI_NAME)"
+ echo "AMI created $AMI_ID ($AMI_FRIENDLY_NAME)"
 }
 
 
@@ -368,7 +368,7 @@ do
      echo "$SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST"
      $SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST
      if test x"$S3_BUCKET" != x""; then
-       $SCRIPTS_ROOT/upload_results.sh $INSTANCE_TYPE "$TEST/out" "$S3_BUCKET/$AMI_NAME"
+       $SCRIPTS_ROOT/upload_results.sh $INSTANCE_TYPE "$TEST/out" "$S3_BUCKET/$AMI_FRIENDLY_NAME"
      fi
      FAILE=$?
   fi
