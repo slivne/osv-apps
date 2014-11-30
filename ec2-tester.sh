@@ -331,9 +331,9 @@ do
      selector="ec2_$INSTANCE_TYPE"
      echo "$SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST"
      $SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST
-     if test x"$S3_BUCKET" != ""; then
-       $SCRIPTS_ROOT/upload_results.sh $INSTANCE_TYPE $TEST $S3_BUCKET
-     fi
+#     if test x"$S3_BUCKET" != ""; then
+#       $SCRIPTS_ROOT/upload_results.sh $INSTANCE_TYPE $TEST $S3_BUCKET
+#     fi
      FAILE=$?
   fi
   ec2-get-console-output $TEST_INSTANCE_ID
