@@ -234,6 +234,7 @@ prepare_instance_for_test() {
  TEST_INSTANCE_ID=`ec2-run-instances $AMI_ID --availability-zone $AWS_ZONE \
                                                   --instance-type $INSTANCE_TYPE \
                                                   --block-device-mapping '/dev/sdb=ephemeral0' \
+                                                  --block-device-mapping '/dev/sdc=ephemeral1' \
                                                   $PLACEMENT_GROUP_PARAM \
                                                   $EC2_USER_DATA_PARAM \
                                                   $EC2_KEYS \
