@@ -28,7 +28,7 @@ SLEEP_TIME=300
 EPHEMERAL=""
 AMI_FRIENDLY_NAME=""
 
-USE_SSD=("c3.xlarge")
+USE_SSD=("c3.xlarge" "c3.8xlarge")
 declare -A image_names=( ["amazon"]="ami-b66ed3de" ["rhel"]="ami-a8d369c0")
 
 PARAM_HELP_LONG="--help"
