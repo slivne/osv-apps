@@ -1,0 +1,19 @@
+{
+  "tester" : {
+     "memaslap" : {
+        "threads" : "3",
+        "concurrency" : "120",
+        "duration" : "60s",
+        "multi" : "4",
+        "base_port" : "11300",
+        "test_delimiter" : ">>>>>>> end <<<<<<<"
+     }
+     "sut" : {
+     "os" : {
+          "linux" : {
+               "ec2_user_data": "/file:linux_setup.sh"
+          }
+      }
+  }
+  }
+}
