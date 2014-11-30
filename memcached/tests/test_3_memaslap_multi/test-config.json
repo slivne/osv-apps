@@ -7,7 +7,7 @@
         "multi" : "4",
         "base_port" : "11300",
         "test_delimiter" : ">>>>>>> end <<<<<<<"
-     }
+     },
      "sut" : {
      "os" : {
           "linux" : {
