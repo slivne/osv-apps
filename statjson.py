@@ -46,7 +46,7 @@ def create_values():
             else:
                 res[k + "_std"] = math.sqrt(s)
             if res[k] != 0:
-                res[k + "_rsd"] = res[k + "_std"] /  res[k]
+                res[k + "_rsd"] = (res[k + "_std"] /  res[k]) * 100
             else:
                 res[k + "_rsd"] = 0
     res["total"] = max
