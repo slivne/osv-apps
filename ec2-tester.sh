@@ -211,13 +211,12 @@ fi
 post_test_cleanup() {
  if test x"$TEST_INSTANCE_ID" != x""; then
 	if test $NO_KILL = 1; then
-    echo ". $SCRIPTS_ROOT/ec2-utils.sh" > clean_test.sh
-    echo "delete_instance " $TEST_INSTANCE_ID >> clean_test.sh
-    echo "wait_for_instance_delete " $TEST_INSTANCE_ID >> clean_test.sh
+           echo ". $SCRIPTS_ROOT/ec2-utils.sh" > clean_test.sh
+	   echo "delete_instance " $TEST_INSTANCE_ID >> clean_test.sh
+	   echo "wait_for_instance_delete " $TEST_INSTANCE_ID >> clean_test.sh
 	else
-#    	stop_instance_forcibly $TEST_INSTANCE_ID
-		delete_instance $TEST_INSTANCE_ID
-    wait_for_instance_delete $TEST_INSTANCE_ID
+	   delete_instance $TEST_INSTANCE_ID
+           wait_for_instance_delete $TEST_INSTANCE_ID
 	fi
 	TEST_INSTANCE_ID=""
  fi
@@ -270,6 +269,8 @@ prepare_instance_for_test() {
 
  TEST_INSTANCE_ID=`ec2-run-instances $AMI_ID --availability-zone $AWS_ZONE \
                                                   --instance-type $INSTANCE_TYPE \
+                                                  --block-device-mapping '/dev/sdb=ephemeral0' \
+                                                  --block-device-mapping '/dev/sdc=ephemeral1' \
                                                   $PLACEMENT_GROUP_PARAM \
                                                   $EC2_USER_DATA_PARAM \
                                                   $EC2_KEYS \
@@ -367,10 +368,10 @@ do
      selector="ec2_$INSTANCE_TYPE"
      echo "$SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST"
      $SCRIPTS_ROOT/tester.py run --config_param sut.ip:$TEST_INSTANCE_IP --config_param tester.ip:127.0.0.1 --config_selection $selector $TEST
+     FAIL=$?
      if test x"$S3_BUCKET" != x""; then
        $SCRIPTS_ROOT/upload_results.sh $INSTANCE_TYPE "$TEST/out" "$S3_BUCKET/$AMI_FRIENDLY_NAME"
      fi
-     FAILE=$?
   fi
   ec2-get-console-output $TEST_INSTANCE_ID > "$TEST/out/console.txt"
 
@@ -384,4 +385,3 @@ do
 done
 
 exit $ANY_TEST_FAILED
-

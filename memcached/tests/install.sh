@@ -25,3 +25,4 @@ sudo ldconfig /usr/local/lib
 
 ../../tester/generic/install.sh
 cat ../../tester/generic/setenv.sh > setenv.sh
+echo "export PATH=$PATH:/usr/local/bin" >> setenv.sh

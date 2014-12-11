@@ -96,6 +96,7 @@ def run_stat(files):
     create_values()
 
 def xpath(obj, path, pos):
+    print json.dumps(obj, indent=4)
     if isinstance(obj, dict):
         if pos < len(path):
             if pos + 1 == len(path):
@@ -109,7 +110,7 @@ def xpath(obj, path, pos):
                                 sys.stdout.write(",")
                             sys.stdout.write(json.dumps(obj[v]))
                         else:
-                            print ("Path not found")
+                            print ("Path not found 1")
                             sys.exit(-1)
                     print('')
             else:
@@ -128,7 +129,7 @@ def xpath(obj, path, pos):
             elif path[pos].isdigit() and int(path[pos]) < len(obj):
                 xpath(obj[int(path[pos])], path, pos +1)
             else:
-                print ("Path not found")
+                print ("Path not found 2")
                 sys.exit(-1)
         else:
             print json.dumps(obj, indent=4)
