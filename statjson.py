@@ -5,6 +5,7 @@ import argparse
 import sys
 import collections
 import traceback
+import math
 from __builtin__ import str
 
 sum_values = {}
@@ -12,6 +13,7 @@ sq_values = {}
 count_values = {}
 total = 0
 def inc_arr(arr, k, v):
+
     if k in arr:
         arr[k] = arr[k] + v
     else:
@@ -29,6 +31,27 @@ def add_values(obj):
             inc_arr(sq_values, k, v*v)
             inc_arr(count_values, k, 1)
 
+def create_values():
+    res = {}
+    max = 0
+    for k,v in count_values.items():
+        if v > max:
+            max = v
+        if k in sum_values and v > 0:
+            vf = float(v)
+            res[k] = float(sum_values[k])/vf
+            s = float(sq_values[k])/vf - (res[k] * res[k])
+            if s < 0.000000000001:
+                res[k + "_std"] = 0
+            else:
+                res[k + "_std"] = math.sqrt(s)
+            if res[k] != 0:
+                res[k + "_rsd"] = (res[k + "_std"] /  res[k]) * 100
+            else:
+                res[k + "_rsd"] = 0
+    res["total"] = max
+    print json.dumps(res, sort_keys=True, indent=4, separators=(',', ': '))
+
 def print_values():
 #    print json.dumps(count_values, indent=4)
     print ("{")
@@ -38,14 +61,20 @@ def print_values():
     print ('"total": ' + str(total) + '\n}')
 
 def json_from_file(name):
-    json_data = open(name)
-    data = json.load(json_data)
-    json_data.close()
-    return data
-
-def parse_file(name):        
     try:
-        data = json_from_file(name)
+        json_data = open(name)
+        data = json.load(json_data)
+        json_data.close()
+        return data
+    except:
+        t, value, tb = sys.exc_info()
+        traceback.print_tb(tb)
+        print("Bad formatted JSON file '" + name + "' error ", value.message)
+        sys.exit(-1)
+
+def parse_file(data):
+    try:
+
         if isinstance(data, dict):
             add_values(data)
         else:
@@ -56,12 +85,18 @@ def parse_file(name):
         traceback.print_tb(tb)
         print("Bad formatted JSON file '" + name + "' error ", value.message)
         sys.exit(-1)
+
 def run_stat(files):
-    for f in files:
-        parse_file(f) 
-    print_values()
+    if len(files) == 0:
+        parse_file(json.load(sys.stdin))
+    else:
+        for f in files:
+            parse_file(json_from_file(f))
+#    print_values()
+    create_values()
 
 def xpath(obj, path, pos):
+    print json.dumps(obj, indent=4)
     if isinstance(obj, dict):
         if pos < len(path):
             if pos + 1 == len(path):
@@ -75,11 +110,11 @@ def xpath(obj, path, pos):
                                 sys.stdout.write(",")
                             sys.stdout.write(json.dumps(obj[v]))
                         else:
-                            print ("Path not found")
+                            print ("Path not found 1")
                             sys.exit(-1)
                     print('')
-            else:  
-                if path[pos] in obj:                
+            else:
+                if path[pos] in obj:
                     xpath(obj[path[pos]], path, pos +1)
                 else:
                     print ("Path not found")
@@ -94,22 +129,26 @@ def xpath(obj, path, pos):
             elif path[pos].isdigit() and int(path[pos]) < len(obj):
                 xpath(obj[int(path[pos])], path, pos +1)
             else:
-                print ("Path not found")
+                print ("Path not found 2")
                 sys.exit(-1)
         else:
             print json.dumps(obj, indent=4)
-        
+
     else:
         print obj
-    
+
 def xpath_search(files, path):
     paths = path.split("/")
-    for f in files:
-        xpath(json_from_file(f), paths, 0)
+    if len(files) == 0:
+        xpath(json.load(sys.stdin), paths, 0)
+    else:
+        for f in files:
+            xpath(json_from_file(f), paths, 0)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser('statjson')
     parser.add_argument('--path', default='', nargs='?',help='use xpath to search in json object')
-    parser.add_argument('file',nargs='+',help='file to run statistic on')
+    parser.add_argument('file',default='', nargs='*',help='file to run statistic on')
     args=parser.parse_args()
     if args.path != '':
         xpath_search(args.file, args.path)
