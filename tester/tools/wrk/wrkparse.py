@@ -2,6 +2,7 @@
 import re
 import sys
 import operator
+import json
 
 def text_to_nanos(text):
     if text.endswith('ms'):
@@ -35,7 +36,6 @@ Transfer/sec\:\s*(?P<transfer>.*?)\s*"""
 
     def __init__(self, text):
         self.m = re.match(self.pattern, text, re.MULTILINE)
-        print self.m
         if not self.m:
             raise Exception('Input does not match')
 
@@ -63,26 +63,14 @@ Transfer/sec\:\s*(?P<transfer>.*?)\s*"""
             return float(val)
         return val
 
-def print_table(data):
-    formats = []
-
-    for header, value in data:
-        formats.append('%%%ds' % (max(len(str(value)), len(header))))
-
-    format = ' '.join(formats)
-
-    print format % tuple(map(operator.itemgetter(0), data))
-    print format % tuple(map(str, map(operator.itemgetter(1), data)))
-
 def read(filename):
     with open(filename) as file:
         return wrk_output(file.read())
 
 if __name__ == "__main__":
-    print sys.argv
     summary = read(sys.argv[1])
-    print_table([
-        ('Req/s', summary.requests_per_second),
-        ('Errors', summary.error_count),
-        ('Latency-max [ms]', summary.latency_max / 1e6),
-    ])
+    print json.dumps({
+        'TPS': float(summary.requests_per_second),
+        'Errors': summary.error_count,
+        'Latency-max-ms': summary.latency_max / 1e6,
+    },indent=0)
