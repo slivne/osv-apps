@@ -9,7 +9,7 @@ if [ ! -d wrk ]; then
    cd wrk
    make
    cd ..
-
-   echo export WRK="`pwd`/wrk/wrk" > setenv.sh
-   echo export WRKPARSE="`pwd`/wrkparse.py" >> setenv.sh
 fi
+
+echo export WRK="`pwd`/wrk/wrk" > setenv.sh
+echo export WRKPARSE="`pwd`/wrkparse.py" >> setenv.sh
