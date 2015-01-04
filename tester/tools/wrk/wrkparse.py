@@ -13,8 +13,8 @@ def text_to_nanos(text):
         return float(text.rstrip('ns'))
     if text.endswith('s'):
         return float(text.rstrip('s')) * 1e9
-    if text.endswith('s'):
-        return float(text.rstrip('s')) * 1e9 * 60
+    if text.endswith('m'):
+        return float(text.rstrip('m')) * 1e9 * 60
     return float(text)
 
 class wrk_output:
